@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Results – Knowledge Synthesizer</title>
+
+<style>
+body { font-family: Segoe UI; background:#f4f6f8; }
+.layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    padding: 2rem;
+}
+.sidebar {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+.canvas-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1rem;
+}
+canvas { width: 100%; height: 500px; }
+.key {
+    padding: 0.6rem;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #007BFF;
+}
+</style>
+</head>
+
+<body>
+<a href="/input">← Back</a>
+
+<div class="layout">
+    <div class="sidebar">
+        <h3>Key Points</h3>
+        <div class="key">AI personalizes learning</div>
+        <div class="key">Privacy is a concern</div>
+    </div>
+
+    <div class="canvas-box">
+        <canvas id="graph"></canvas>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById("graph");
+const ctx = canvas.getContext("2d");
+canvas.width = canvas.parentElement.offsetWidth;
+canvas.height = 500;
+
+const nodes = [
+    {x: 300, y: 200, r: 25, label:"AI in Education"},
+    {x: 150, y: 100, r: 18, label:"Efficiency"},
+    {x: 450, y: 100, r: 18, label:"Privacy"}
+];
+
+function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle="#ccc";
+    ctx.beginPath();
+    ctx.moveTo(nodes[0].x, nodes[0].y);
+    ctx.lineTo(nodes[1].x, nodes[1].y);
+    ctx.lineTo(nodes[2].x, nodes[2].y);
+    ctx.stroke();
+
+    nodes.forEach(n=>{
+        ctx.beginPath();
+        ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+        ctx.fillStyle="#007BFF";
+        ctx.fill();
+        ctx.fillStyle="#000";
+        ctx.fillText(n.label,n.x-20,n.y+n.r+15);
+    });
+}
+draw();
+</script>
+</body>
+</html>
