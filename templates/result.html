@@ -252,10 +252,11 @@ function expand(id) {
     layout.classList.add("expanded");
     sidebar.classList.add("active");
 
-    if (id === "map" && !window.graphRendered) {
-        window.graphRendered = true;
+    if (id === "map") {
+        window.graphRendered = false;
         setTimeout(renderGraph, 100);
     }
+
 }
 </script>
 
@@ -414,11 +415,14 @@ function renderGraph() {
 
 <script>
 {% if open_map %}
-    window.addEventListener("load", () => {
+window.addEventListener("load", () => {
+    setTimeout(() => {
         expand("map");
-    });
+    }, 150);
+});
 {% endif %}
 </script>
+
 
 </body>
 </html>
