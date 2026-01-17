@@ -110,6 +110,27 @@ def transcribe_and_translate_wav(wav_path, language_code):
     return original_text, translated_text
 
 
+def transcribe_and_translate_base64(audio_base64, language_code):
+    """
+    Wrapper around existing Azure STT logic
+    Returns (original_text, translated_text)
+    """
+    audio_bytes = base64.b64decode(audio_base64)
+    raw_path = f"{UPLOAD_FOLDER}/mic_{uuid.uuid4().hex}.webm"
+    wav_path = raw_path.replace(".webm", ".wav")
+
+    with open(raw_path, "wb") as f:
+        f.write(audio_bytes)
+
+    subprocess.run(
+        ["ffmpeg", "-y", "-i", raw_path, "-ac", "1", "-ar", "16000", wav_path],
+        check=True
+    )
+
+    # 🔁 Reuse your existing Azure STT logic here
+    return transcribe_and_translate_wav(wav_path, language_code)
+
+
 # -------------------------------------------------
 # BASIC PAGE ROUTES
 # -------------------------------------------------
@@ -481,6 +502,53 @@ def process_audio():
         traceback.print_exc()
         return "Audio processing error", 500
 
+
+
+@app.route("/process-mic", methods=["POST"])
+def process_mic():
+    try:
+        data = request.get_json(force=True)
+        print("🎙️ Mic audio received")
+
+        audio_base64 = data.get("audio")
+        language_code = data.get("language", "en-IN")
+
+        if not audio_base64:
+            print("❌ No audio data")
+            return jsonify({"error": "No audio provided"}), 400
+
+        # 🔁 Reuse existing /transcribe logic internally (SAFE WAY)
+        original_text, translated_text = transcribe_and_translate_base64(
+            audio_base64,
+            language_code
+        )
+
+        print("📝 Original:", original_text)
+        print("🌐 English:", translated_text)
+
+        if not translated_text.strip():
+            return jsonify({"error": "Empty transcription"}), 500
+
+        # Store transcripts
+        session["original_transcript"] = original_text
+        session["translated_transcript"] = translated_text
+
+        # AI pipeline
+        key_notes = generate_key_notes(translated_text)
+        detailed_points = generate_detailed_points(translated_text)
+        memory_map = generate_memory_map(translated_text)
+
+        session["key_notes"] = key_notes
+        session["detailed_points"] = detailed_points
+        session["memory_map"] = memory_map
+
+        print("✅ Mic pipeline complete")
+        return jsonify({"success": True})
+
+    except Exception:
+        print("❌ Error in /process-mic")
+        traceback.print_exc()
+        return jsonify({"error": "Mic processing failed"}), 500
 
 
 # -------------------------------------------------
