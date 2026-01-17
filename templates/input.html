@@ -131,8 +131,16 @@ button {
 
     <!-- TEXT INPUT -->
     <div class="section active" id="text-section">
-        <textarea placeholder="Paste discussion transcript here..."></textarea>
-        <button onclick="goNext()">Continue</button>
+                <form method="POST" action="/process-text">
+            <textarea 
+                name="discussion_text"
+                placeholder="Paste discussion transcript here..."
+                required
+            ></textarea>
+        
+            <button type="submit">Continue</button>
+        </form>
+
     </div>
 
     <!-- FILE INPUT -->
@@ -157,10 +165,6 @@ function selectMode(mode, el) {
     document.getElementById(mode + '-section').classList.add('active');
 }
 
-function goNext() {
-    // TEMPORARY: simulate success
-    window.location.href = "/result";
-}
 </script>
 
 </body>
