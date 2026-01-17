@@ -7,37 +7,38 @@
 
 <style>
 :root {
-    --bg: #070b16;
+    --bg: #050814;
     --glass: rgba(255,255,255,0.06);
-    --border: rgba(255,255,255,0.12);
-    --text: #ffffff;
-    --muted: #c7c9ff;
+    --border: rgba(255,255,255,0.14);
+    --text: #e5e7eb;
+    --muted: #9ca3af;
     --accent: #a855f7;
+    --accent-soft: rgba(168,85,247,0.25);
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Segoe UI", system-ui, sans-serif;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
 body {
-    background: var(--bg);
+    background: radial-gradient(circle at top, #0b1024, #050814);
     color: var(--text);
-    min-height: 100vh;
+    height: 100vh;
     overflow: hidden;
 }
 
-/* LAYOUT */
+/* ---------- LAYOUT ---------- */
 .container {
     display: flex;
     height: 100vh;
     padding: 2rem;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
-/* LEFT BAR (when collapsed) */
+/* ---------- SIDE BAR ---------- */
 .sidebar {
     width: 70px;
     display: none;
@@ -56,56 +57,70 @@ body {
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 1rem 0.6rem;
-    text-align: center;
     cursor: pointer;
-    font-weight: 600;
     color: var(--muted);
+    text-align: center;
+    transition: 0.25s;
 }
 
-/* MAIN AREA */
+.side-tab:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+
+/* ---------- MAIN ---------- */
 .main {
     flex: 1;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 }
 
-/* CARDS */
 .cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     width: 100%;
     max-width: 1100px;
-    transition: all 0.4s ease;
 }
 
+/* ---------- CARD ---------- */
 .card {
-    background: var(--glass);
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.08),
+        rgba(255,255,255,0.02)
+    );
     border: 1px solid var(--border);
     border-radius: 22px;
-    padding: 2rem;
+    padding: 2.5rem;
     cursor: pointer;
-    backdrop-filter: blur(14px);
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    backdrop-filter: blur(16px);
+    transition: 0.35s ease;
 }
 
 .card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-8px);
+    border-color: var(--accent);
 }
 
 .card h2 {
-    font-size: 1.6rem;
-    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .card p {
     color: var(--muted);
-    font-size: 1rem;
-    line-height: 1.6;
 }
 
-/* EXPANDED STATE */
+/* ---------- CONTENT ---------- */
+.content {
+    display: none;
+    margin-top: 2rem;
+    line-height: 1.7;
+}
+
+/* ---------- EXPANDED MODE ---------- */
 .container.expanded .cards {
     grid-template-columns: 1fr;
     max-width: none;
@@ -119,26 +134,20 @@ body {
     display: block;
     height: 100%;
     cursor: default;
+    box-shadow: 0 0 40px var(--accent-soft);
 }
 
-/* CONTENT */
-.content {
-    margin-top: 1.5rem;
-    color: var(--muted);
-    line-height: 1.7;
+.card.active .content {
+    display: block;
 }
 
-/* GRAPH PLACEHOLDER */
+/* ---------- GRAPH ---------- */
 .graph-box {
-    margin-top: 2rem;
-    height: 380px;
+    height: 70vh;
+    width: 100%;
+    margin-top: 1.5rem;
     border-radius: 18px;
     border: 1px dashed var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-size: 1rem;
 }
 </style>
 </head>
@@ -147,7 +156,7 @@ body {
 
 <div class="container" id="layout">
 
-    <!-- LEFT BAR -->
+    <!-- SIDE BAR -->
     <div class="sidebar" id="sidebar">
         <div class="side-tab" onclick="expand('notes')">Key Notes</div>
         <div class="side-tab" onclick="expand('details')">Detailed</div>
@@ -161,63 +170,69 @@ body {
             <!-- KEY NOTES -->
             <div class="card" id="notes" onclick="expand('notes')">
                 <h2>Key Notes</h2>
-                <p>High-level takeaways extracted from the discussion.</p>
+                <p>Compressed insights from the discussion</p>
 
-                    <div class="content">
+                <div class="content">
                     <pre style="white-space: pre-wrap;">{{ key_notes }}</pre>
-                    </div>
-
+                </div>
             </div>
 
             <!-- DETAILED -->
             <div class="card" id="details" onclick="expand('details')">
-                <h2>Detailed Points</h2>
-                <p>Arguments, counterarguments, and reasoning chains.</p>
+                <h2>Detailed Analysis</h2>
+                <p>Arguments, counterarguments, reasoning</p>
 
-                     <div class="content">
+                <div class="content">
                     <p>{{ detailed_points }}</p>
-                    </div>
-
+                </div>
             </div>
 
-            <!-- MAP -->
+            <!-- MEMORY MAP -->
             <div class="card" id="map" onclick="expand('map')">
                 <h2>Memory Map</h2>
-                <p>Visual representation of conceptual relationships.</p>
+                <p>Conceptual structure of the discussion</p>
 
-                <div class="graph-box" id="graph"></div>
+                <div class="content">
+                    <div class="graph-box" id="graph"></div>
+                </div>
             </div>
 
         </div>
     </div>
 </div>
 
+<!-- D3 -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
 <script>
 function expand(id) {
     const layout = document.getElementById("layout");
     const sidebar = document.getElementById("sidebar");
 
-    document.querySelectorAll(".card").forEach(c => {
-        c.classList.remove("active");
-    });
+    document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
 
-    document.getElementById(id).classList.add("active");
+    const activeCard = document.getElementById(id);
+    activeCard.classList.add("active");
 
     layout.classList.add("expanded");
     sidebar.classList.add("active");
+
+    if (id === "map" && !window.graphRendered) {
+        window.graphRendered = true;
+        setTimeout(renderGraph, 100);
+    }
 }
 </script>
 
-<script src="https://d3js.org/d3.v7.min.js"></script>
-    
 <script>
-const graphData = {{ memory_map | tojson }};
+function renderGraph() {
+    const graphData = {{ memory_map | tojson }};
 
-if (graphData.nodes && graphData.nodes.length > 0) {
+    if (!graphData.nodes || graphData.nodes.length === 0) return;
 
     const graphEl = document.getElementById("graph");
-    const width = graphEl.clientWidth || 700;
-    const height = graphEl.clientHeight || 400;
+    const width = graphEl.clientWidth || 800;
+    const height = graphEl.clientHeight || 500;
 
     const svg = d3.select("#graph")
         .append("svg")
@@ -238,10 +253,8 @@ if (graphData.nodes && graphData.nodes.length > 0) {
     }));
 
     const simulation = d3.forceSimulation(graphData.nodes)
-        .force("link", d3.forceLink(links)
-            .id(d => d.id)
-            .distance(130))
-        .force("charge", d3.forceManyBody().strength(-350))
+        .force("link", d3.forceLink(links).id(d => d.id).distance(140))
+        .force("charge", d3.forceManyBody().strength(-380))
         .force("center", d3.forceCenter(width / 2, height / 2));
 
     const link = svg.append("g")
@@ -313,9 +326,6 @@ if (graphData.nodes && graphData.nodes.length > 0) {
     }
 }
 </script>
-
-
-
 
 </body>
 </html>
