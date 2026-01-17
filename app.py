@@ -1,6 +1,7 @@
 import os
 import re
 import requests
+from flask_session import Session
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from dotenv import load_dotenv
 from together import Together
@@ -24,6 +25,11 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "temporary-secret")
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+app.config["SESSION_TYPE"] = "filesystem"  # Store data in a folder, not cookie
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
+app.config["SESSION_FILE_DIR"] = "./flask_session_cache" # Create a local folder
+Session(app)
 # -------------------------------------------------
 # AZURE + TOGETHER CONFIG
 # -------------------------------------------------
