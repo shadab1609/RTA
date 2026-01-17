@@ -185,12 +185,7 @@ body {
                 <h2>Memory Map</h2>
                 <p>Visual representation of conceptual relationships.</p>
 
-                <div class="graph-box" style="overflow:auto; text-align:left;">
-                    <pre style="white-space: pre-wrap; font-size: 0.85rem;">
-                {{ memory_map | tojson(indent=2) }}
-                    </pre>
-                </div>
-
+                <div class="graph-box" id="graph"></div>
             </div>
 
         </div>
@@ -212,6 +207,112 @@ function expand(id) {
     sidebar.classList.add("active");
 }
 </script>
+
+<script>
+const graphData = {{ memory_map | tojson }};
+
+if (graphData.nodes && graphData.nodes.length > 0) {
+
+    const width = document.getElementById("graph").clientWidth;
+    const height = document.getElementById("graph").clientHeight;
+
+    const svg = d3.select("#graph")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    const colorByType = {
+        concept: "#a855f7",
+        argument: "#22c55e",
+        concern: "#ef4444",
+        outcome: "#3b82f6"
+    };
+
+    const linkStyle = {
+        supports: "solid",
+        challenges: "dashed",
+        leads_to: "solid"
+    };
+
+    const simulation = d3.forceSimulation(graphData.nodes)
+        .force("link", d3.forceLink(graphData.edges)
+            .id(d => d.id)
+            .distance(120))
+        .force("charge", d3.forceManyBody().strength(-300))
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+    const link = svg.append("g")
+        .selectAll("line")
+        .data(graphData.edges)
+        .enter()
+        .append("line")
+        .attr("stroke", "#aaa")
+        .attr("stroke-width", 1.8)
+        .attr("stroke-dasharray", d =>
+            linkStyle[d.relation] === "dashed" ? "5,5" : "0"
+        );
+
+    const node = svg.append("g")
+        .selectAll("circle")
+        .data(graphData.nodes)
+        .enter()
+        .append("circle")
+        .attr("r", 18)
+        .attr("fill", d => colorByType[d.type] || "#999")
+        .call(d3.drag()
+            .on("start", dragStarted)
+            .on("drag", dragged)
+            .on("end", dragEnded)
+        );
+
+    const label = svg.append("g")
+        .selectAll("text")
+        .data(graphData.nodes)
+        .enter()
+        .append("text")
+        .text(d => d.label)
+        .attr("font-size", "11px")
+        .attr("fill", "#e5e7eb")
+        .attr("text-anchor", "middle")
+        .attr("dy", 32);
+
+    simulation.on("tick", () => {
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+        node
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y);
+
+        label
+            .attr("x", d => d.x)
+            .attr("y", d => d.y);
+    });
+
+    function dragStarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    function dragEnded(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+
+}
+</script>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
 
 </body>
 </html>
