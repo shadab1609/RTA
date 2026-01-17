@@ -196,11 +196,11 @@ body {
                     
                     <div class="graph-box" id="graph"></div>
 
-                    <form method="POST" action="/result" class="refine-box">
+                    <div class="refine-box">
                         <textarea
-                            name="refinement_context"
+                            id="refineInput"
                             rows="2"
-                            placeholder="Refine the map (e.g. add more detail, focus on decisions, show risks)"
+                            placeholder="Refine the map (e.g. add more detail, focus on decisions)"
                             style="
                                 width: 100%;
                                 resize: none;
@@ -214,7 +214,8 @@ body {
                         ></textarea>
                     
                         <button
-                            type="submit"
+                            id="regenBtn"
+                            onclick="regenerateMap()"
                             style="
                                 margin-top: 0.75rem;
                                 padding: 0.6rem 1.5rem;
@@ -223,11 +224,49 @@ body {
                                 background: #a855f7;
                                 color: white;
                                 cursor: pointer;
+                                transition: 0.2s;
                             "
                         >
                             Regenerate Map
                         </button>
-                    </form>
+                        <span id="loadingMsg" style="display:none; color:#a855f7; margin-left:10px;">Synthesizing...</span>
+                    </div>
+                    
+                    <script>
+                    async function regenerateMap() {
+                        const input = document.getElementById("refineInput");
+                        const btn = document.getElementById("regenBtn");
+                        const msg = document.getElementById("loadingMsg");
+                        
+                        if (!input.value.trim()) return;
+                    
+                        // UI Loading State
+                        btn.disabled = true;
+                        btn.style.opacity = "0.5";
+                        msg.style.display = "inline";
+                    
+                        try {
+                            const formData = new FormData();
+                            formData.append("refinement_context", input.value);
+                    
+                            // Send to backend without reloading page
+                            const response = await fetch("/result", {
+                                method: "POST",
+                                body: formData
+                            });
+                    
+                            if (response.ok) {
+                                // Reload page smoothly to fetch new session data
+                                window.location.reload(); 
+                            } else {
+                                alert("Failed to regenerate. Check console.");
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            alert("Error connecting to server.");
+                        }
+                    }
+                    </script>
 
                 </div>
             </div>
