@@ -6,78 +6,215 @@
 <title>Results – Knowledge Synthesizer</title>
 
 <style>
-body { font-family: Segoe UI; background:#f4f6f8; }
-.layout {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 2rem;
+:root {
+    --bg: #070b16;
+    --glass: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.12);
+    --text: #ffffff;
+    --muted: #c7c9ff;
+    --accent: #a855f7;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* LAYOUT */
+.container {
+    display: flex;
+    height: 100vh;
     padding: 2rem;
+    gap: 2rem;
 }
+
+/* LEFT BAR (when collapsed) */
 .sidebar {
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 12px;
+    width: 70px;
+    display: none;
+    flex-direction: column;
+    gap: 1rem;
 }
-.canvas-box {
-    background: #fff;
-    border-radius: 12px;
-    padding: 1rem;
+
+.sidebar.active {
+    display: flex;
 }
-canvas { width: 100%; height: 500px; }
-.key {
-    padding: 0.6rem;
-    margin-bottom: 0.5rem;
-    border-left: 4px solid #007BFF;
+
+.side-tab {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 0.6rem;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+/* MAIN AREA */
+.main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* CARDS */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    width: 100%;
+    max-width: 1100px;
+    transition: all 0.4s ease;
+}
+
+.card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 2rem;
+    cursor: pointer;
+    backdrop-filter: blur(14px);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+}
+
+.card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+}
+
+.card p {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* EXPANDED STATE */
+.container.expanded .cards {
+    grid-template-columns: 1fr;
+    max-width: none;
+}
+
+.container.expanded .card {
+    display: none;
+}
+
+.container.expanded .card.active {
+    display: block;
+    height: 100%;
+    cursor: default;
+}
+
+/* CONTENT */
+.content {
+    margin-top: 1.5rem;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+/* GRAPH PLACEHOLDER */
+.graph-box {
+    margin-top: 2rem;
+    height: 380px;
+    border-radius: 18px;
+    border: 1px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 1rem;
 }
 </style>
 </head>
 
 <body>
-<a href="/input">← Back</a>
 
-<div class="layout">
-    <div class="sidebar">
-        <h3>Key Points</h3>
-        <div class="key">AI personalizes learning</div>
-        <div class="key">Privacy is a concern</div>
+<div class="container" id="layout">
+
+    <!-- LEFT BAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="side-tab" onclick="expand('notes')">Key Notes</div>
+        <div class="side-tab" onclick="expand('details')">Detailed</div>
+        <div class="side-tab" onclick="expand('map')">Memory Map</div>
     </div>
 
-    <div class="canvas-box">
-        <canvas id="graph"></canvas>
+    <!-- MAIN -->
+    <div class="main">
+        <div class="cards">
+
+            <!-- KEY NOTES -->
+            <div class="card" id="notes" onclick="expand('notes')">
+                <h2>Key Notes</h2>
+                <p>High-level takeaways extracted from the discussion.</p>
+
+                <div class="content">
+                    <ul>
+                        <li>AI improves personalized learning</li>
+                        <li>Privacy remains a major concern</li>
+                        <li>Teachers shift toward facilitation roles</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- DETAILED -->
+            <div class="card" id="details" onclick="expand('details')">
+                <h2>Detailed Points</h2>
+                <p>Arguments, counterarguments, and reasoning chains.</p>
+
+                <div class="content">
+                    <p>
+                        Supporters argue that AI enables adaptive curricula,
+                        while critics warn of data misuse and algorithmic bias.
+                        The discussion highlighted unresolved trade-offs.
+                    </p>
+                </div>
+            </div>
+
+            <!-- MAP -->
+            <div class="card" id="map" onclick="expand('map')">
+                <h2>Memory Map</h2>
+                <p>Visual representation of conceptual relationships.</p>
+
+                <div class="graph-box">
+                    Knowledge Graph will render here
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 
 <script>
-const canvas = document.getElementById("graph");
-const ctx = canvas.getContext("2d");
-canvas.width = canvas.parentElement.offsetWidth;
-canvas.height = 500;
+function expand(id) {
+    const layout = document.getElementById("layout");
+    const sidebar = document.getElementById("sidebar");
 
-const nodes = [
-    {x: 300, y: 200, r: 25, label:"AI in Education"},
-    {x: 150, y: 100, r: 18, label:"Efficiency"},
-    {x: 450, y: 100, r: 18, label:"Privacy"}
-];
-
-function draw() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle="#ccc";
-    ctx.beginPath();
-    ctx.moveTo(nodes[0].x, nodes[0].y);
-    ctx.lineTo(nodes[1].x, nodes[1].y);
-    ctx.lineTo(nodes[2].x, nodes[2].y);
-    ctx.stroke();
-
-    nodes.forEach(n=>{
-        ctx.beginPath();
-        ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
-        ctx.fillStyle="#007BFF";
-        ctx.fill();
-        ctx.fillStyle="#000";
-        ctx.fillText(n.label,n.x-20,n.y+n.r+15);
+    document.querySelectorAll(".card").forEach(c => {
+        c.classList.remove("active");
     });
+
+    document.getElementById(id).classList.add("active");
+
+    layout.classList.add("expanded");
+    sidebar.classList.add("active");
 }
-draw();
 </script>
+
 </body>
 </html>
