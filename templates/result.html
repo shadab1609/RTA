@@ -276,6 +276,10 @@ function renderGraph() {
     console.log("🧠 Nodes:", graphData.nodes.length);
     console.log("🔗 Edges:", graphData.edges.length);
 
+    const graphContainer = document.getElementById("graph");
+    graphContainer.innerHTML = ""; // 🔥 REQUIRED
+
+    
     const svg = d3.select("#graph")
         .append("svg")
         .attr("width", width)
@@ -408,6 +412,13 @@ function renderGraph() {
 }
 </script>
 
+<script>
+{% if open_map %}
+    window.addEventListener("load", () => {
+        expand("map");
+    });
+{% endif %}
+</script>
 
 </body>
 </html>
