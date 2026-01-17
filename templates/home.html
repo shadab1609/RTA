@@ -1,1 +1,138 @@
-this is html file
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Synthesizer</title>
+
+<style>
+/* ===== SAME CSS VARIABLES + GLOBAL STYLES ===== */
+:root {
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F4F6F8;
+    --text-primary: #0A192F;
+    --text-secondary: #2C3E50;
+    --accent-color: #007BFF;
+    --accent-hover: #0056b3;
+    --border-color: #E0E0E0;
+}
+[data-theme="dark"] {
+    --bg-primary: #1a0b2e;
+    --bg-secondary: #2E0249;
+    --text-primary: #FFFFFF;
+    --text-secondary: #D1D5DB;
+    --accent-color: #00E5FF;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: Segoe UI, Arial; }
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+header {
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+.logo { font-size: 1.5rem; font-weight: 800; cursor: pointer; }
+.brand-text {
+    background: linear-gradient(135deg, var(--text-primary), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.theme-toggle {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+}
+main { flex: 1; max-width: 1200px; margin: auto; padding: 2rem; }
+
+.hero { text-align: center; padding: 4rem 0; }
+.hero h1 { font-size: 3rem; margin-bottom: 1rem; }
+.hero p { font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem; }
+
+.btn-primary {
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    border: none;
+    font-size: 1.1rem;
+    background: var(--accent-color);
+    color: #fff;
+    cursor: pointer;
+}
+
+.z-section {
+    display: flex;
+    gap: 3rem;
+    margin: 4rem 0;
+}
+.z-section:nth-child(even) { flex-direction: row-reverse; }
+.z-text { flex: 1; }
+.z-image {
+    flex: 1;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    height: 300px;
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+</style>
+</head>
+
+<body>
+<header>
+    <div class="logo"><span class="brand-text">Knowledge Synthesizer</span></div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+</header>
+
+<main>
+    <section class="hero">
+        <h1>Turn Chaos into Structure</h1>
+        <p>Convert classroom discussions into interactive knowledge maps.</p>
+        <a href="/input"><button class="btn-primary">Get Started</button></a>
+    </section>
+
+    <div class="z-section">
+        <div class="z-text">
+            <h2>The Problem</h2>
+            <p>Discussions disappear without structure.</p>
+        </div>
+        <div class="z-image"></div>
+    </div>
+
+    <div class="z-section">
+        <div class="z-text">
+            <h2>The Solution</h2>
+            <p>AI extracts logic, arguments, and questions.</p>
+        </div>
+        <div class="z-image"></div>
+    </div>
+
+    <div class="z-section">
+        <div class="z-text">
+            <h2>The Benefit</h2>
+            <p>Visual reasoning you can revisit anytime.</p>
+        </div>
+        <div class="z-image"></div>
+    </div>
+</main>
+
+<footer>Hackathon Prototype</footer>
+
+<script>
+function toggleTheme() {
+    document.body.toggleAttribute("data-theme", "dark");
+}
+</script>
+</body>
+</html>
