@@ -185,9 +185,12 @@ body {
                 <h2>Memory Map</h2>
                 <p>Visual representation of conceptual relationships.</p>
 
-                <div class="graph-box">
-                    Knowledge Graph will render here
+                <div class="graph-box" style="overflow:auto; text-align:left;">
+                    <pre style="white-space: pre-wrap; font-size: 0.85rem;">
+                {{ memory_map | tojson(indent=2) }}
+                    </pre>
                 </div>
+
             </div>
 
         </div>
