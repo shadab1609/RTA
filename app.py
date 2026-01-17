@@ -112,6 +112,61 @@ Discussion:
     return call_together(prompt)
 
 
+import json
+
+def generate_memory_map(text):
+    print("🧠 Generating memory map...")
+    prompt = f"""
+You are an AI assistant that converts discussions into structured knowledge graphs.
+
+Instructions:
+- Analyze the discussion text below.
+- Extract key concepts, arguments, concerns, and outcomes.
+- Represent them as a knowledge graph in JSON format.
+- Use short, clear labels.
+
+Node rules:
+- Each node must have:
+  - id (short unique string)
+  - label (human-readable)
+  - type (one of: concept, argument, concern, outcome)
+
+Edge rules:
+- Each edge must have:
+  - from (node id)
+  - to (node id)
+  - relation (one of: supports, challenges, leads_to)
+
+Constraints:
+- Output ONLY valid JSON.
+- Do NOT include explanations or extra text.
+- Do NOT invent information not present in the discussion.
+- Limit to a maximum of 15 nodes.
+
+JSON format:
+{{
+  "nodes": [...],
+  "edges": [...]
+}}
+
+Discussion:
+{text}
+"""
+    raw_output = call_together(prompt)
+
+    try:
+        graph = json.loads(raw_output)
+        print("✅ Memory map JSON parsed successfully")
+        return graph
+    except Exception:
+        print("❌ Failed to parse memory map JSON")
+        print(raw_output)
+        return {
+            "nodes": [],
+            "edges": []
+        }
+    
+
 # -------------------------------------------------
 # PROCESS TEXT INPUT
 # -------------------------------------------------
@@ -128,9 +183,11 @@ def process_text():
 
         key_notes = generate_key_notes(input_text)
         detailed_points = generate_detailed_points(input_text)
-
+        memory_map = generate_memory_map(input_text)
+        
         session["key_notes"] = key_notes
         session["detailed_points"] = detailed_points
+        session["memory_map"] = memory_map
 
         print("✅ AI outputs stored in session")
         return redirect(url_for("result_page"))
@@ -149,9 +206,11 @@ def process_text():
 def result_page():
     return render_template(
         "result.html",
-        key_notes=session.get("key_notes", "No key notes generated."),
-        detailed_points=session.get("detailed_points", "No detailed analysis generated.")
+        key_notes=session.get("key_notes", ""),
+        detailed_points=session.get("detailed_points", ""),
+        memory_map=session.get("memory_map", {})
     )
+
 
 
 # -------------------------------------------------
