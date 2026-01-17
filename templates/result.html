@@ -215,8 +215,9 @@ const graphData = {{ memory_map | tojson }};
 
 if (graphData.nodes && graphData.nodes.length > 0) {
 
-    const width = document.getElementById("graph").clientWidth;
-    const height = document.getElementById("graph").clientHeight;
+    const graphEl = document.getElementById("graph");
+    const width = graphEl.clientWidth || 700;
+    const height = graphEl.clientHeight || 400;
 
     const svg = d3.select("#graph")
         .append("svg")
@@ -230,28 +231,28 @@ if (graphData.nodes && graphData.nodes.length > 0) {
         outcome: "#3b82f6"
     };
 
-    const linkStyle = {
-        supports: "solid",
-        challenges: "dashed",
-        leads_to: "solid"
-    };
+    const links = graphData.edges.map(e => ({
+        source: e.from,
+        target: e.to,
+        relation: e.relation
+    }));
 
     const simulation = d3.forceSimulation(graphData.nodes)
-        .force("link", d3.forceLink(graphData.edges)
+        .force("link", d3.forceLink(links)
             .id(d => d.id)
-            .distance(120))
-        .force("charge", d3.forceManyBody().strength(-300))
+            .distance(130))
+        .force("charge", d3.forceManyBody().strength(-350))
         .force("center", d3.forceCenter(width / 2, height / 2));
 
     const link = svg.append("g")
         .selectAll("line")
-        .data(graphData.edges)
+        .data(links)
         .enter()
         .append("line")
-        .attr("stroke", "#aaa")
+        .attr("stroke", "#9ca3af")
         .attr("stroke-width", 1.8)
         .attr("stroke-dasharray", d =>
-            linkStyle[d.relation] === "dashed" ? "5,5" : "0"
+            d.relation === "challenges" ? "6,4" : "0"
         );
 
     const node = svg.append("g")
@@ -310,9 +311,9 @@ if (graphData.nodes && graphData.nodes.length > 0) {
         d.fx = null;
         d.fy = null;
     }
-
 }
 </script>
+
 
 
 
