@@ -52,10 +52,26 @@ def home():
 
 @app.route("/input")
 def input_page():
-    """
-    Input page (UI only for now)
-    """
     return render_template("input.html")
+
+
+@app.route("/process-text", methods=["POST"])
+def process_text():
+    # later: receive text, store in session
+    return redirect(url_for("result_page"))
+
+
+@app.route("/process-audio", methods=["POST"])
+def process_audio():
+    # later: handle file upload + STT
+    return redirect(url_for("result_page"))
+
+
+@app.route("/process-mic", methods=["POST"])
+def process_mic():
+    # later: handle base64 mic audio
+    return redirect(url_for("result_page"))
+
 
 
 @app.route("/result")
