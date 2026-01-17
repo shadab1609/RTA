@@ -454,7 +454,8 @@ def process_text():
         if not input_text:
             print("⚠️ Empty input received")
             return redirect(url_for("input_page"))
-
+        
+        session["source_text"] = input_text
         key_notes = generate_key_notes(input_text)
         detailed_points = generate_detailed_points(input_text)
         memory_map = generate_memory_map(input_text)
@@ -524,6 +525,7 @@ def process_audio():
         # 6️⃣ Store transcripts (for UI display later)
         session["original_transcript"] = original_text
         session["translated_transcript"] = translated_text
+        session["source_text"] = translated_text
 
         # 7️⃣ AI PIPELINE (English only)
         key_notes = generate_key_notes(translated_text)
@@ -577,6 +579,7 @@ def process_mic():
         # Store transcripts
         session["original_transcript"] = original_text
         session["translated_transcript"] = translated_text
+        session["source_text"] = translated_text
 
         # AI pipeline
         key_notes = generate_key_notes(translated_text)
