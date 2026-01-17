@@ -186,17 +186,82 @@ button {
 
     <!-- MIC INPUT (UI ONLY FOR NOW) -->
     <div class="section" id="mic-section">
-        <p>
-            Live microphone recording is coming next.
-            <br>
-            For now, please upload an audio file.
-        </p>
-        <button disabled style="opacity:0.5; cursor:not-allowed;">
-            Start Recording
-        </button>
+            <label>Spoken language</label>
+            <select id="micLanguage">
+                <option value="en-IN">English</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="or-IN">Odia</option>
+            </select>
+        
+            <p id="micStatus" style="margin-top:1rem;color:#c7c9ff;">
+                Click start and allow microphone access.
+            </p>
+        
+            <button id="startMic">Start Recording</button>
+            <button id="stopMic" disabled>Stop Recording</button>
     </div>
 
+
 </div>
+
+<script>
+let mediaRecorder;
+let audioChunks = [];
+
+const startBtn = document.getElementById("startMic");
+const stopBtn = document.getElementById("stopMic");
+const statusText = document.getElementById("micStatus");
+
+startBtn.onclick = async () => {
+    audioChunks = [];
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+    mediaRecorder.onstop = async () => {
+        statusText.innerText = "Processing audio...";
+
+        const blob = new Blob(audioChunks, { type: "audio/webm" });
+        const reader = new FileReader();
+
+        reader.onloadend = async () => {
+            const base64 = reader.result.split(",")[1];
+            const language = document.getElementById("micLanguage").value;
+
+            const response = await fetch("/process-mic", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    audio: base64,
+                    language: language
+                })
+            });
+
+            if (response.ok) {
+                window.location.href = "/result";
+            } else {
+                statusText.innerText = "Mic processing failed.";
+            }
+        };
+
+        reader.readAsDataURL(blob);
+    };
+
+    mediaRecorder.start();
+    statusText.innerText = "Recording...";
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+};
+
+stopBtn.onclick = () => {
+    mediaRecorder.stop();
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+};
+</script>
+
 
 <script>
 function selectMode(mode, el) {
