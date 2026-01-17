@@ -7,26 +7,23 @@
 
 <style>
 :root {
-    --bg-primary: #0b0f1a;
-    --bg-secondary: #11162a;
+    --bg-primary: #070b16;
     --text-primary: #ffffff;
-    --text-secondary: #b7c0ff;
-    --accent-color: #a855f7;
-    --accent-hover: #9333ea;
-    --border-color: rgba(255,255,255,0.08);
+    --text-secondary: #c7c9ff;
+    --accent: #a855f7;
+    --border: rgba(255,255,255,0.1);
 }
 
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    box-sizing: border-box;
+    font-family: "Segoe UI", system-ui, sans-serif;
 }
 
 body {
     background: var(--bg-primary);
     color: var(--text-primary);
-    min-height: 100vh;
     overflow-x: hidden;
 }
 
@@ -40,26 +37,23 @@ body {
 /* CONTENT LAYER */
 .page {
     position: relative;
-    z-index: 1;
+    z-index: 2;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
 }
 
 /* HEADER */
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     padding: 1.5rem 3rem;
-    border-bottom: 1px solid var(--border-color);
-    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
 }
 
 .logo {
     font-size: 1.6rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #ffffff, var(--accent-color));
+    background: linear-gradient(135deg, #fff, var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -67,19 +61,15 @@ header {
 /* MAIN */
 main {
     flex: 1;
-    max-width: 1200px;
+    max-width: 1100px;
     margin: auto;
-    padding: 4rem 2rem;
+    padding: 5rem 2rem;
+    text-align: center;
 }
 
 /* HERO */
-.hero {
-    text-align: center;
-    margin-bottom: 6rem;
-}
-
 .hero h1 {
-    font-size: 3.4rem;
+    font-size: 3.5rem;
     font-weight: 800;
     line-height: 1.1;
     margin-bottom: 1.5rem;
@@ -88,82 +78,67 @@ main {
 .hero p {
     font-size: 1.25rem;
     color: var(--text-secondary);
-    max-width: 720px;
-    margin: 0 auto 2.5rem;
+    max-width: 760px;
+    margin: 0 auto 3rem;
 }
 
+/* CTA */
 .btn-primary {
-    padding: 1rem 3rem;
+    padding: 1.1rem 3.2rem;
     border-radius: 999px;
     border: none;
+    background: var(--accent);
+    color: #fff;
     font-size: 1.1rem;
     font-weight: 600;
-    background: var(--accent-color);
-    color: #fff;
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(168,85,247,0.35);
+    box-shadow: 0 15px 45px rgba(168,85,247,0.45);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 40px rgba(168,85,247,0.5);
+    box-shadow: 0 20px 60px rgba(168,85,247,0.6);
 }
 
-/* SECTIONS */
-.section {
+/* FEATURES */
+.features {
+    margin-top: 6rem;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
-    margin-bottom: 6rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2.5rem;
 }
 
-.section:nth-child(even) {
-    direction: rtl;
-}
-.section:nth-child(even) > * {
-    direction: ltr;
-}
-
-.section h2 {
-    font-size: 2.2rem;
-    margin-bottom: 1rem;
-}
-
-.section p {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    line-height: 1.7;
-}
-
-.visual {
-    height: 280px;
+.feature {
+    padding: 2rem;
     border-radius: 16px;
-    background: linear-gradient(
-        135deg,
-        rgba(168,85,247,0.15),
-        rgba(59,130,246,0.08)
-    );
-    border: 1px solid var(--border-color);
-    box-shadow: inset 0 0 60px rgba(168,85,247,0.15);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(6px);
+}
+
+.feature h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+    color: #fff;
+}
+
+.feature p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
 }
 
 /* FOOTER */
 footer {
-    text-align: center;
     padding: 2rem;
-    border-top: 1px solid var(--border-color);
-    color: var(--text-secondary);
+    text-align: center;
     font-size: 0.9rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border);
 }
 
 /* RESPONSIVE */
-@media (max-width: 900px) {
-    .section {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
+@media (max-width: 768px) {
     .hero h1 {
         font-size: 2.6rem;
     }
@@ -173,7 +148,7 @@ footer {
 
 <body>
 
-<!-- PARTICLES -->
+<!-- PARTICLES BACKGROUND -->
 <div id="particles-js"></div>
 
 <div class="page">
@@ -185,56 +160,48 @@ footer {
 <main>
 
     <section class="hero">
-        <h1>From Discussion to Understanding</h1>
+        <h1>Turn Discussions<br>into Structured Knowledge</h1>
         <p>
-            An AI system that transforms unstructured classroom conversations
-            into structured knowledge, arguments, and visual reasoning maps.
+            An AI-powered system that converts unstructured classroom
+            conversations into key points, arguments, counterarguments,
+            and visual knowledge maps.
         </p>
+
         <a href="/input">
             <button class="btn-primary">Start Synthesizing</button>
         </a>
     </section>
 
-    <section class="section">
-        <div>
-            <h2>The Problem</h2>
+    <section class="features">
+        <div class="feature">
+            <h3>Speech & Text Ingestion</h3>
             <p>
-                Classroom discussions contain valuable ideas, disagreements,
-                and insights — but once the session ends, this reasoning
-                disappears. Notes capture words, not thought structure.
+                Accepts live audio, recordings, or raw text transcripts
+                from real classroom environments.
             </p>
         </div>
-        <div class="visual"></div>
-    </section>
 
-    <section class="section">
-        <div>
-            <h2>The Solution</h2>
+        <div class="feature">
+            <h3>AI Reasoning Layer</h3>
             <p>
-                Knowledge Synthesizer uses AI to extract concepts, arguments,
-                counterpoints, and open questions from discussions, converting
-                raw speech into structured reasoning.
+                Extracts concepts, arguments, counterpoints, and open
+                questions instead of producing flat summaries.
             </p>
         </div>
-        <div class="visual"></div>
-    </section>
 
-    <section class="section">
-        <div>
-            <h2>The Outcome</h2>
+        <div class="feature">
+            <h3>Knowledge Maps</h3>
             <p>
-                Instead of flat summaries, students and educators receive
-                interactive knowledge maps that reveal how ideas connect,
-                conflict, and evolve.
+                Generates visual graphs that reveal how ideas connect,
+                support, or contradict each other.
             </p>
         </div>
-        <div class="visual"></div>
     </section>
 
 </main>
 
 <footer>
-    Built for a 24-Hour Hackathon · Team RTA
+    24-Hour Hackathon Prototype · Team RTA
 </footer>
 
 </div>
@@ -245,21 +212,30 @@ footer {
 window.onload = function () {
   particlesJS("particles-js", {
     particles: {
-      number: { value: 220, density: { enable: true, value_area: 900 } },
+      number: {
+        value: 280,
+        density: { enable: true, value_area: 900 }
+      },
       color: { value: "#a855f7" },
       shape: { type: "circle" },
-      opacity: { value: 0.5, random: true },
-      size: { value: 3, random: true },
+      opacity: {
+        value: 0.6,
+        random: true
+      },
+      size: {
+        value: 3,
+        random: true
+      },
       line_linked: {
         enable: true,
-        distance: 140,
+        distance: 150,
         color: "#a855f7",
-        opacity: 0.25,
+        opacity: 0.35,
         width: 1
       },
       move: {
         enable: true,
-        speed: 1.6,
+        speed: 1.4,
         direction: "none",
         out_mode: "out"
       }
