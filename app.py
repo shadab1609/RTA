@@ -236,7 +236,7 @@ Constraints:
 - Output ONLY valid JSON.
 - Do NOT include explanations or extra text.
 - Do NOT invent information not present in the discussion.
-- Limit to a maximum of 15 nodes.
+- Limit to a maximum of 35 nodes.
 
 JSON format:
 {{
@@ -261,6 +261,51 @@ Discussion:
             "edges": []
         }
 
+
+def regenerate_memory_map(text, refinement_context):
+    print("🔁 Regenerating memory map with refinement")
+
+    prompt = f"""
+You are an AI system that builds MEMORY MAPS of discussions.
+
+Original task:
+Convert the discussion into a structured knowledge graph that preserves
+how ideas, actions, and outcomes are connected.
+
+User refinement:
+{refinement_context}
+
+Guidance:
+- Increase structural clarity based on the refinement
+- Add detail only where it improves understanding
+- Prefer explicit relationships (who does what, under what conditions)
+
+Rules:
+- Output ONLY valid JSON
+- Do NOT explain
+- Do NOT summarize
+- Max 35 nodes
+
+JSON format:
+{{
+  "nodes": [...],
+  "edges": [...]
+}}
+
+Discussion:
+{text}
+"""
+
+    raw_output = call_together(prompt)
+
+    try:
+        graph = json.loads(raw_output)
+        print("✅ Refined memory map parsed")
+        return graph
+    except Exception:
+        print("❌ Failed to parse refined memory map")
+        print(raw_output)
+        return {"nodes": [], "edges": []}
 
 @app.route('/translate_text', methods=['POST'])
 def translate_text():
@@ -555,14 +600,38 @@ def process_mic():
 # RESULT PAGE
 # -------------------------------------------------
 
-@app.route("/result")
+@app.route("/result", methods=["GET", "POST"])
 def result_page():
-    return render_template(
-        "result.html",
-        key_notes=session.get("key_notes", ""),
-        detailed_points=session.get("detailed_points", ""),
-        memory_map=session.get("memory_map", {})
-    )
+    try:
+        # If user clicked "Regenerate Map"
+        if request.method == "POST":
+            refinement = request.form.get("refinement_context", "").strip()
+            source_text = session.get("source_text", "")
+
+            if refinement and source_text:
+                print("🔁 Regenerating memory map")
+                print("🧩 Refinement:", refinement)
+
+                refined_map = regenerate_memory_map(
+                    source_text,
+                    refinement
+                )
+
+                session["memory_map"] = refined_map
+                session["last_refinement"] = refinement
+
+        return render_template(
+            "result.html",
+            key_notes=session.get("key_notes", ""),
+            detailed_points=session.get("detailed_points", ""),
+            memory_map=session.get("memory_map", {})
+        )
+
+    except Exception:
+        print("❌ Error loading / regenerating result")
+        traceback.print_exc()
+        return "Result page error", 500
+
 
 
 
