@@ -603,7 +603,8 @@ def process_mic():
 @app.route("/result", methods=["GET", "POST"])
 def result_page():
     try:
-        # If user clicked "Regenerate Map"
+        open_map = False  # 👈 default
+
         if request.method == "POST":
             refinement = request.form.get("refinement_context", "").strip()
             source_text = session.get("source_text", "")
@@ -619,18 +620,21 @@ def result_page():
 
                 session["memory_map"] = refined_map
                 session["last_refinement"] = refinement
+                open_map = True  # 👈 force-open map after regen
 
         return render_template(
             "result.html",
             key_notes=session.get("key_notes", ""),
             detailed_points=session.get("detailed_points", ""),
-            memory_map=session.get("memory_map", {})
+            memory_map=session.get("memory_map", {}),
+            open_map=open_map  # 👈 pass flag to UI
         )
 
     except Exception:
         print("❌ Error loading / regenerating result")
         traceback.print_exc()
         return "Result page error", 500
+
 
 
 
