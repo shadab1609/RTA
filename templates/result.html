@@ -189,84 +189,53 @@ body {
 
             <!-- MEMORY MAP -->
             <div class="card" id="map" onclick="expand('map')">
-                <h2>Memory Map</h2>
-                <p>Conceptual structure of the discussion</p>
-
-                <div class="content">
-                    
-                    <div class="graph-box" id="graph"></div>
-
-                    <div class="refine-box">
-                        <textarea
-                            id="refineInput"
-                            rows="2"
-                            placeholder="Refine the map (e.g. add more detail, focus on decisions)"
-                            style="
-                                width: 100%;
-                                resize: none;
-                                margin-top: 1rem;
-                                padding: 0.75rem;
-                                border-radius: 10px;
-                                background: rgba(255,255,255,0.05);
-                                border: 1px solid rgba(255,255,255,0.15);
-                                color: white;
-                            "
-                        ></textarea>
-                    
-                        <button
-                            id="regenBtn"
-                            onclick="regenerateMap()"
-                            style="
-                                margin-top: 0.75rem;
-                                padding: 0.6rem 1.5rem;
-                                border-radius: 999px;
-                                border: none;
-                                background: #a855f7;
-                                color: white;
-                                cursor: pointer;
-                                transition: 0.2s;
-                            "
-                        >
-                            Regenerate Map
-                        </button>
-                        <span id="loadingMsg" style="display:none; color:#a855f7; margin-left:10px;">Synthesizing...</span>
-                    </div>
-                    
-                    <script>
-                    async function regenerateMap() {
-                        const input = document.getElementById("refineInput");
-                        const btn = document.getElementById("regenBtn");
-                        const msg = document.getElementById("loadingMsg");
+                    <h2>Memory Map</h2>
+                    <p>Conceptual structure of the discussion</p>
+                
+                    <div class="content" onclick="event.stopPropagation()">
                         
-                        if (!input.value.trim()) return;
+                        <div class="graph-box" id="graph"></div>
+                
+                        <div class="refine-box">
+                            <textarea
+                                id="refineInput"
+                                rows="2"
+                                placeholder="Refine the map (e.g. add more detail, focus on decisions)"
+                                style="
+                                    width: 100%;
+                                    resize: none;
+                                    margin-top: 1rem;
+                                    padding: 0.75rem;
+                                    border-radius: 10px;
+                                    background: rgba(255,255,255,0.05);
+                                    border: 1px solid rgba(255,255,255,0.15);
+                                    color: white;
+                                "
+                            ></textarea>
+                        
+                            <button
+                                id="regenBtn"
+                                onclick="regenerateMap()" 
+                                style="
+                                    margin-top: 0.75rem;
+                                    padding: 0.6rem 1.5rem;
+                                    border-radius: 999px;
+                                    border: none;
+                                    background: #a855f7;
+                                    color: white;
+                                    cursor: pointer;
+                                    transition: 0.2s;
+                                "
+                            >
+                                Regenerate Map
+                            </button>
+                            <span id="loadingMsg" style="display:none; color:#a855f7; margin-left:10px;">Synthesizing...</span>
+                        </div>
+                
+                    </div>
+                </div>
                     
-                        // UI Loading State
-                        btn.disabled = true;
-                        btn.style.opacity = "0.5";
-                        msg.style.display = "inline";
                     
-                        try {
-                            const formData = new FormData();
-                            formData.append("refinement_context", input.value);
-                    
-                            // Send to backend without reloading page
-                            const response = await fetch("/result", {
-                                method: "POST",
-                                body: formData
-                            });
-                    
-                            if (response.ok) {
-                                // Reload page smoothly to fetch new session data
-                                window.location.reload(); 
-                            } else {
-                                alert("Failed to regenerate. Check console.");
-                            }
-                        } catch (e) {
-                            console.error(e);
-                            alert("Error connecting to server.");
-                        }
-                    }
-                    </script>
 
                 </div>
             </div>
@@ -298,7 +267,43 @@ function expand(id) {
 
 }
 </script>
+<script>
+async function regenerateMap() {
+    const input = document.getElementById("refineInput");
+    const btn = document.getElementById("regenBtn");
+    const msg = document.getElementById("loadingMsg");
+    
+    if (!input.value.trim()) return;
 
+    // UI Loading State
+    btn.disabled = true;
+    btn.style.opacity = "0.5";
+    msg.style.display = "inline";
+
+    try {
+        const formData = new FormData();
+        formData.append("refinement_context", input.value);
+
+        // Send to backend without reloading page
+        const response = await fetch("/result", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            // Reload page smoothly to fetch new session data
+            window.location.reload(); 
+        } else {
+            alert("Failed to regenerate. Check console.");
+            btn.disabled = false;
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Error connecting to server.");
+        btn.disabled = false;
+    }
+}
+</script>
 <script>
 function renderGraph() {
     const graphData = {{ memory_map | tojson }};
@@ -312,20 +317,14 @@ function renderGraph() {
     const width = graphEl.clientWidth || 900;
     const height = graphEl.clientHeight || 600;
 
-    console.log("📐 Graph container size:", { width, height });
-    console.log("🧠 Nodes:", graphData.nodes.length);
-    console.log("🔗 Edges:", graphData.edges.length);
-
-    const graphContainer = document.getElementById("graph");
-    graphContainer.innerHTML = ""; // 🔥 REQUIRED
-
+    // Clear previous graph
+    graphEl.innerHTML = ""; 
     
     const svg = d3.select("#graph")
         .append("svg")
         .attr("width", width)
         .attr("height", height);
 
-    // Root group (for zoom + pan)
     const g = svg.append("g");
 
     const colorByType = {
@@ -335,7 +334,21 @@ function renderGraph() {
         outcome: "#3b82f6"
     };
 
-    const links = graphData.edges.map(e => ({
+    // 🛡️ SECURITY FIX: Filter out "Hallucinated" Edges
+    // 1. Create a Set of all valid Node IDs
+    const validNodeIds = new Set(graphData.nodes.map(n => n.id));
+
+    // 2. Only keep edges where BOTH source and target exist
+    const cleanEdges = graphData.edges.filter(e => {
+        if (!validNodeIds.has(e.from) || !validNodeIds.has(e.to)) {
+            console.warn(`🗑️ Removed broken edge: ${e.from} -> ${e.to}`);
+            return false;
+        }
+        return true;
+    });
+
+    // 3. Map the CLEAN edges
+    const links = cleanEdges.map(e => ({
         source: e.from,
         target: e.to,
         relation: e.relation
