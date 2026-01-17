@@ -96,6 +96,17 @@ textarea {
     resize: none;
 }
 
+/* FILE INPUT */
+input[type="file"], select {
+    width: 100%;
+    padding: 0.9rem;
+    margin-top: 1rem;
+    background: transparent;
+    color: var(--text);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
 /* BUTTON */
 button {
     margin-top: 1.5rem;
@@ -106,6 +117,12 @@ button {
     color: white;
     font-size: 1rem;
     cursor: pointer;
+}
+
+.note {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 0.8rem;
 }
 </style>
 </head>
@@ -131,29 +148,54 @@ button {
 
     <!-- TEXT INPUT -->
     <div class="section active" id="text-section">
-                <form method="POST" action="/process-text">
+        <form method="POST" action="/process-text">
             <textarea 
                 name="discussion_text"
                 placeholder="Paste discussion transcript here..."
                 required
             ></textarea>
-        
-            <button type="submit">Continue</button>
+            <button type="submit">Analyze Discussion</button>
         </form>
-
     </div>
 
-    <!-- FILE INPUT -->
+    <!-- AUDIO FILE INPUT -->
     <div class="section" id="file-section">
-        <input type="file" accept="audio/*">
-        <button onclick="goNext()">Transcribe & Continue</button>
+        <form method="POST" action="/process-audio" enctype="multipart/form-data">
+
+            <label>Spoken Language</label>
+            <select name="language" required>
+                <option value="en-IN">English</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="or-IN">Odia</option>
+            </select>
+
+            <input 
+                type="file"
+                name="audio_file"
+                accept="audio/*"
+                required
+            >
+
+            <div class="note">
+                Audio will be transcribed and translated to English before analysis.
+            </div>
+
+            <button type="submit">Transcribe & Analyze</button>
+        </form>
     </div>
 
-    <!-- MIC INPUT -->
+    <!-- MIC INPUT (UI ONLY FOR NOW) -->
     <div class="section" id="mic-section">
-        <p>Click start and allow microphone access.</p>
-        <button onclick="goNext()">Start Recording</button>
+        <p>
+            Live microphone recording is coming next.
+            <br>
+            For now, please upload an audio file.
+        </p>
+        <button disabled style="opacity:0.5; cursor:not-allowed;">
+            Start Recording
+        </button>
     </div>
+
 </div>
 
 <script>
@@ -164,7 +206,6 @@ function selectMode(mode, el) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById(mode + '-section').classList.add('active');
 }
-
 </script>
 
 </body>
