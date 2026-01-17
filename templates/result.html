@@ -193,7 +193,42 @@ body {
                 <p>Conceptual structure of the discussion</p>
 
                 <div class="content">
+                    
                     <div class="graph-box" id="graph"></div>
+
+                    <form method="POST" action="/result" class="refine-box">
+                        <textarea
+                            name="refinement_context"
+                            rows="2"
+                            placeholder="Refine the map (e.g. add more detail, focus on decisions, show risks)"
+                            style="
+                                width: 100%;
+                                resize: none;
+                                margin-top: 1rem;
+                                padding: 0.75rem;
+                                border-radius: 10px;
+                                background: rgba(255,255,255,0.05);
+                                border: 1px solid rgba(255,255,255,0.15);
+                                color: white;
+                            "
+                        ></textarea>
+                    
+                        <button
+                            type="submit"
+                            style="
+                                margin-top: 0.75rem;
+                                padding: 0.6rem 1.5rem;
+                                border-radius: 999px;
+                                border: none;
+                                background: #a855f7;
+                                color: white;
+                                cursor: pointer;
+                            "
+                        >
+                            Regenerate Map
+                        </button>
+                    </form>
+
                 </div>
             </div>
 
