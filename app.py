@@ -10,6 +10,7 @@ import uuid
 import time
 import math
 from PIL import Image
+import traceback
 
 # -------------------------------------------------
 # ENV + APP SETUP
@@ -24,29 +25,24 @@ UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # -------------------------------------------------
-# AZURE + TOGETHER CONFIG (UNCHANGED)
+# AZURE + TOGETHER CONFIG
 # -------------------------------------------------
 
 AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY")
 AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION")
-AZURE_SPEECH_ENDPOINT = os.getenv("AZURE_SPEECH_ENDPOINT")
 
-AZURE_TRANSLATOR_KEY = os.getenv("AZURE_TRANSLATOR_KEY")
-AZURE_TRANSLATOR_REGION = os.getenv("AZURE_TRANSLATOR_REGION")
-AZURE_TRANSLATOR_ENDPOINT = os.getenv("AZURE_TRANSLATOR_ENDPOINT")
+client = Together(api_key=os.getenv("TOGETHER_API_KEY"))
 
-client = Together()
+print("✅ App started")
+print("🔑 Together API key loaded:", bool(os.getenv("TOGETHER_API_KEY")))
 
 # -------------------------------------------------
-# BASIC PAGE ROUTES (PHASE 1 – VISIBILITY ONLY)
+# BASIC PAGE ROUTES
 # -------------------------------------------------
 
 @app.route("/")
 @app.route("/home")
 def home():
-    """
-    Home / landing page
-    """
     return render_template("home.html")
 
 
@@ -55,44 +51,107 @@ def input_page():
     return render_template("input.html")
 
 
+# -------------------------------------------------
+# AI HELPERS WITH DEBUGGING
+# -------------------------------------------------
+
+def call_together(prompt):
+    try:
+        print("🤖 Sending prompt to Together.ai...")
+        response = client.chat.completions.create(
+            model="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3
+        )
+        output = response.choices[0].message.content.strip()
+        print("✅ Together.ai response received")
+        return output
+
+    except Exception as e:
+        print("❌ Together.ai call failed")
+        traceback.print_exc()
+        return "⚠️ AI generation failed. Please try again."
+
+
+def generate_key_notes(text):
+    print("📝 Generating key notes...")
+    prompt = f"""
+You are an AI assistant that extracts key notes from classroom discussions.
+
+Instructions:
+- Extract 5 to 8 concise key points.
+- Each point must be short and factual.
+- Do NOT explain.
+- Do NOT repeat ideas.
+
+Return the result as a plain numbered list.
+
+Discussion:
+{text}
+"""
+    return call_together(prompt)
+
+
+def generate_detailed_points(text):
+    print("📘 Generating detailed discussion...")
+    prompt = f"""
+You are an AI assistant that explains discussions in detail.
+
+Instructions:
+- Analyze the discussion text below.
+- Describe the main arguments, counterarguments, and themes.
+- Write in clear, academic but simple language.
+- Do NOT use bullet points.
+- Do NOT add conclusions not present in the text.
+
+Return 2–4 structured paragraphs.
+
+Discussion:
+{text}
+"""
+    return call_together(prompt)
+
+
+# -------------------------------------------------
+# PROCESS TEXT INPUT
+# -------------------------------------------------
+
 @app.route("/process-text", methods=["POST"])
 def process_text():
-    # later: receive text, store in session
-    return redirect(url_for("result_page"))
+    try:
+        input_text = request.form.get("discussion_text", "").strip()
+        print("📥 Received text input")
+
+        if not input_text:
+            print("⚠️ Empty input received")
+            return redirect(url_for("input_page"))
+
+        key_notes = generate_key_notes(input_text)
+        detailed_points = generate_detailed_points(input_text)
+
+        session["key_notes"] = key_notes
+        session["detailed_points"] = detailed_points
+
+        print("✅ AI outputs stored in session")
+        return redirect(url_for("result_page"))
+
+    except Exception as e:
+        print("❌ Error in /process-text")
+        traceback.print_exc()
+        return "Internal error during processing", 500
 
 
-@app.route("/process-audio", methods=["POST"])
-def process_audio():
-    # later: handle file upload + STT
-    return redirect(url_for("result_page"))
-
-
-@app.route("/process-mic", methods=["POST"])
-def process_mic():
-    # later: handle base64 mic audio
-    return redirect(url_for("result_page"))
-
-
+# -------------------------------------------------
+# RESULT PAGE
+# -------------------------------------------------
 
 @app.route("/result")
 def result_page():
-    """
-    Result page (dummy content for now)
-    """
-    return render_template("result.html")
-
-
-@app.route("/process", methods=["POST"])
-def process():
-    """
-    Temporary bridge route.
-    Later this will:
-    - accept text/audio
-    - call STT
-    - call AI
-    For now: just redirect to result page.
-    """
-    return redirect(url_for("result_page"))
+    return render_template(
+        "result.html",
+        key_notes=session.get("key_notes", "No key notes generated."),
+        detailed_points=session.get("detailed_points", "No detailed analysis generated.")
+    )
 
 
 # -------------------------------------------------
@@ -103,80 +162,33 @@ def process():
 def transcribe_audio_base64():
     try:
         data = request.get_json(force=True)
-        print("📥 Raw incoming JSON:", data)
+        print("🎙️ Incoming audio transcription request")
 
         audio_base64 = data.get("audio")
-        language_code = data.get("language", "en-IN")
-
         if not audio_base64:
             return jsonify({"error": "No audio data provided"}), 400
 
-        # Step 1: Decode & save raw audio
         audio_bytes = base64.b64decode(audio_base64)
         raw_audio_path = f"{UPLOAD_FOLDER}/raw_{uuid.uuid4().hex}.webm"
         with open(raw_audio_path, "wb") as f:
             f.write(audio_bytes)
 
-        # Step 2: Convert to WAV
         wav_audio_path = raw_audio_path.replace(".webm", ".wav")
-        ffmpeg_cmd = [
-            "ffmpeg", "-y", "-i", raw_audio_path,
-            "-ac", "1", "-ar", "16000", wav_audio_path
-        ]
-        subprocess.run(ffmpeg_cmd, check=True)
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", raw_audio_path, "-ac", "1", "-ar", "16000", wav_audio_path],
+            check=True
+        )
 
-        # Step 3: Azure Speech-to-Text
-        stt_url = f"https://{AZURE_SPEECH_REGION}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1"
-        headers = {
-            "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
-            "Content-Type": "audio/wav",
-            "Accept": "application/json"
-        }
-        params = {"language": language_code}
-
-        with open(wav_audio_path, "rb") as audio_file:
-            stt_response = requests.post(
-                stt_url, headers=headers, params=params, data=audio_file
-            )
-
-        stt_data = stt_response.json()
-        original_text = stt_data.get("DisplayText", "")
-
-        if not original_text:
-            return jsonify({"error": "Speech recognition returned empty text"}), 500
-
-        # Step 4: Translation (if needed)
-        if language_code.startswith("en"):
-            translated_text = original_text
-        else:
-            trans_url = f"{AZURE_TRANSLATOR_ENDPOINT}/translate?api-version=3.0&to=en"
-            trans_headers = {
-                "Ocp-Apim-Subscription-Key": AZURE_TRANSLATOR_KEY,
-                "Ocp-Apim-Subscription-Region": AZURE_TRANSLATOR_REGION,
-                "Content-Type": "application/json"
-            }
-            trans_body = [{"Text": original_text}]
-            trans_response = requests.post(
-                trans_url, headers=trans_headers, json=trans_body
-            )
-            trans_data = trans_response.json()
-            translated_text = trans_data[0]["translations"][0]["text"]
-
-        return jsonify({
-            "original_text": original_text,
-            "translated_text": translated_text,
-            "language_code": language_code
-        })
-
-    except subprocess.CalledProcessError:
-        return jsonify({"error": "Audio conversion failed"}), 500
+        return jsonify({"status": "Audio processed (STT later)"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print("❌ Error in transcription route")
+        traceback.print_exc()
+        return jsonify({"error": "Transcription failed"}), 500
 
 
 # -------------------------------------------------
-# HEALTH CHECK (OPTIONAL, SAFE)
+# HEALTH CHECK
 # -------------------------------------------------
 
 @app.route("/health")
@@ -185,8 +197,9 @@ def health():
 
 
 # -------------------------------------------------
-# LOCAL ENTRY POINT
+# ENTRY POINT
 # -------------------------------------------------
 
 if __name__ == "__main__":
     app.run(debug=True)
+
