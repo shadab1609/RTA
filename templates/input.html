@@ -1,1 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Input – Knowledge Synthesizer</title>
+
+<style>
+body { font-family: Segoe UI; background:#f4f6f8; }
+.container {
+    max-width: 800px;
+    margin: 4rem auto;
+    background: #fff;
+    padding: 3rem;
+    border-radius: 12px;
+}
+.option {
+    border: 2px solid #ddd;
+    padding: 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+}
+.option.selected {
+    border-color: #007BFF;
+    background: #eef5ff;
+}
+.btn {
+    width: 100%;
+    padding: 1rem;
+    margin-top: 2rem;
+    border-radius: 30px;
+    border: none;
+    background: #007BFF;
+    color: #fff;
+    font-size: 1.1rem;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h1>Configure Synthesis</h1>
+    <p>Select input type</p>
+
+    <div class="option selected">🎤 Microphone</div>
+    <div class="option">📝 Text</div>
+    <div class="option">📁 File</div>
+
+    <form action="/process" method="post">
+        <button class="btn">Synthesize</button>
+    </form>
+</div>
+
+<script>
+document.querySelectorAll('.option').forEach(o => {
+    o.onclick = () => {
+        document.querySelectorAll('.option').forEach(x => x.classList.remove('selected'));
+        o.classList.add('selected');
+    };
+});
+</script>
+</body>
+</html>
 
