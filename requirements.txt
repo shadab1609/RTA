@@ -1,0 +1,9 @@
+Flask==2.3.2
+poppler-utils
+gunicorn
+werkzeug
+requests
+pillow
+python-dotenv
+together
+azure-cognitiveservices-speech
