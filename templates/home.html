@@ -6,133 +6,274 @@
 <title>Knowledge Synthesizer</title>
 
 <style>
-/* ===== SAME CSS VARIABLES + GLOBAL STYLES ===== */
 :root {
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #F4F6F8;
-    --text-primary: #0A192F;
-    --text-secondary: #2C3E50;
-    --accent-color: #007BFF;
-    --accent-hover: #0056b3;
-    --border-color: #E0E0E0;
+    --bg-primary: #0b0f1a;
+    --bg-secondary: #11162a;
+    --text-primary: #ffffff;
+    --text-secondary: #b7c0ff;
+    --accent-color: #a855f7;
+    --accent-hover: #9333ea;
+    --border-color: rgba(255,255,255,0.08);
 }
-[data-theme="dark"] {
-    --bg-primary: #1a0b2e;
-    --bg-secondary: #2E0249;
-    --text-primary: #FFFFFF;
-    --text-secondary: #D1D5DB;
-    --accent-color: #00E5FF;
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: Segoe UI, Arial; }
+
 body {
     background: var(--bg-primary);
     color: var(--text-primary);
     min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* PARTICLES BACKGROUND */
+#particles-js {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+
+/* CONTENT LAYER */
+.page {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
 }
+
+/* HEADER */
 header {
-    padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 1.5rem 3rem;
     border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(8px);
 }
-.logo { font-size: 1.5rem; font-weight: 800; cursor: pointer; }
-.brand-text {
-    background: linear-gradient(135deg, var(--text-primary), var(--accent-color));
+
+.logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff, var(--accent-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
-.theme-toggle {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-}
-main { flex: 1; max-width: 1200px; margin: auto; padding: 2rem; }
 
-.hero { text-align: center; padding: 4rem 0; }
-.hero h1 { font-size: 3rem; margin-bottom: 1rem; }
-.hero p { font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem; }
+/* MAIN */
+main {
+    flex: 1;
+    max-width: 1200px;
+    margin: auto;
+    padding: 4rem 2rem;
+}
+
+/* HERO */
+.hero {
+    text-align: center;
+    margin-bottom: 6rem;
+}
+
+.hero h1 {
+    font-size: 3.4rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.hero p {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+}
 
 .btn-primary {
-    padding: 1rem 2.5rem;
-    border-radius: 50px;
+    padding: 1rem 3rem;
+    border-radius: 999px;
     border: none;
     font-size: 1.1rem;
+    font-weight: 600;
     background: var(--accent-color);
     color: #fff;
     cursor: pointer;
+    box-shadow: 0 10px 30px rgba(168,85,247,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.z-section {
-    display: flex;
-    gap: 3rem;
-    margin: 4rem 0;
-}
-.z-section:nth-child(even) { flex-direction: row-reverse; }
-.z-text { flex: 1; }
-.z-image {
-    flex: 1;
-    background: var(--bg-secondary);
-    border-radius: 12px;
-    height: 300px;
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 40px rgba(168,85,247,0.5);
 }
 
+/* SECTIONS */
+.section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    margin-bottom: 6rem;
+}
+
+.section:nth-child(even) {
+    direction: rtl;
+}
+.section:nth-child(even) > * {
+    direction: ltr;
+}
+
+.section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+}
+
+.section p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.visual {
+    height: 280px;
+    border-radius: 16px;
+    background: linear-gradient(
+        135deg,
+        rgba(168,85,247,0.15),
+        rgba(59,130,246,0.08)
+    );
+    border: 1px solid var(--border-color);
+    box-shadow: inset 0 0 60px rgba(168,85,247,0.15);
+}
+
+/* FOOTER */
 footer {
     text-align: center;
-    padding: 1.5rem;
+    padding: 2rem;
     border-top: 1px solid var(--border-color);
     color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .section {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    .hero h1 {
+        font-size: 2.6rem;
+    }
 }
 </style>
 </head>
 
 <body>
+
+<!-- PARTICLES -->
+<div id="particles-js"></div>
+
+<div class="page">
+
 <header>
-    <div class="logo"><span class="brand-text">Knowledge Synthesizer</span></div>
-    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <div class="logo">Knowledge Synthesizer</div>
 </header>
 
 <main>
+
     <section class="hero">
-        <h1>Turn Chaos into Structure</h1>
-        <p>Convert classroom discussions into interactive knowledge maps.</p>
-        <a href="/input"><button class="btn-primary">Get Started</button></a>
+        <h1>From Discussion to Understanding</h1>
+        <p>
+            An AI system that transforms unstructured classroom conversations
+            into structured knowledge, arguments, and visual reasoning maps.
+        </p>
+        <a href="/input">
+            <button class="btn-primary">Start Synthesizing</button>
+        </a>
     </section>
 
-    <div class="z-section">
-        <div class="z-text">
+    <section class="section">
+        <div>
             <h2>The Problem</h2>
-            <p>Discussions disappear without structure.</p>
+            <p>
+                Classroom discussions contain valuable ideas, disagreements,
+                and insights — but once the session ends, this reasoning
+                disappears. Notes capture words, not thought structure.
+            </p>
         </div>
-        <div class="z-image"></div>
-    </div>
+        <div class="visual"></div>
+    </section>
 
-    <div class="z-section">
-        <div class="z-text">
+    <section class="section">
+        <div>
             <h2>The Solution</h2>
-            <p>AI extracts logic, arguments, and questions.</p>
+            <p>
+                Knowledge Synthesizer uses AI to extract concepts, arguments,
+                counterpoints, and open questions from discussions, converting
+                raw speech into structured reasoning.
+            </p>
         </div>
-        <div class="z-image"></div>
-    </div>
+        <div class="visual"></div>
+    </section>
 
-    <div class="z-section">
-        <div class="z-text">
-            <h2>The Benefit</h2>
-            <p>Visual reasoning you can revisit anytime.</p>
+    <section class="section">
+        <div>
+            <h2>The Outcome</h2>
+            <p>
+                Instead of flat summaries, students and educators receive
+                interactive knowledge maps that reveal how ideas connect,
+                conflict, and evolve.
+            </p>
         </div>
-        <div class="z-image"></div>
-    </div>
+        <div class="visual"></div>
+    </section>
+
 </main>
 
-<footer>Hackathon Prototype</footer>
+<footer>
+    Built for a 24-Hour Hackathon · Team RTA
+</footer>
 
+</div>
+
+<!-- PARTICLES JS -->
+<script src="/templates/particles.min.js"></script>
 <script>
-function toggleTheme() {
-    document.body.toggleAttribute("data-theme", "dark");
-}
+window.onload = function () {
+  particlesJS("particles-js", {
+    particles: {
+      number: { value: 220, density: { enable: true, value_area: 900 } },
+      color: { value: "#a855f7" },
+      shape: { type: "circle" },
+      opacity: { value: 0.5, random: true },
+      size: { value: 3, random: true },
+      line_linked: {
+        enable: true,
+        distance: 140,
+        color: "#a855f7",
+        opacity: 0.25,
+        width: 1
+      },
+      move: {
+        enable: true,
+        speed: 1.6,
+        direction: "none",
+        out_mode: "out"
+      }
+    },
+    interactivity: {
+      events: {
+        onhover: { enable: false },
+        onclick: { enable: false }
+      }
+    },
+    retina_detect: true
+  });
+};
 </script>
+
 </body>
 </html>
