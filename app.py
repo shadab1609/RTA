@@ -56,6 +56,60 @@ SUPPORTED_LANGUAGES = {
     'or-IN': 'Odia'
 }
 
+def transcribe_and_translate_wav(wav_path, language_code):
+    """
+    Core Azure STT + optional translation logic.
+    Returns (original_text, translated_text)
+    """
+    stt_url = f"https://{AZURE_SPEECH_REGION}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1"
+    headers = {
+        "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
+        "Content-Type": "audio/wav",
+        "Accept": "application/json"
+    }
+    params = {"language": language_code}
+
+    with open(wav_path, 'rb') as audio_file:
+        stt_response = requests.post(
+            stt_url,
+            headers=headers,
+            params=params,
+            data=audio_file
+        )
+
+    print("🔁 Azure STT Status:", stt_response.status_code)
+    print("🔊 Azure STT Raw:", stt_response.text)
+
+    stt_data = stt_response.json()
+    original_text = stt_data.get("DisplayText", "")
+
+    if not original_text:
+        raise ValueError("Empty transcription")
+
+    # Translate only if non-English
+    if language_code.startswith("en"):
+        return original_text, original_text
+
+    trans_url = f"{AZURE_TRANSLATOR_ENDPOINT}/translate?api-version=3.0&to=en"
+    trans_headers = {
+        "Ocp-Apim-Subscription-Key": AZURE_TRANSLATOR_KEY,
+        "Ocp-Apim-Subscription-Region": AZURE_TRANSLATOR_REGION,
+        "Content-Type": "application/json"
+    }
+    trans_body = [{"Text": original_text}]
+
+    trans_response = requests.post(
+        trans_url,
+        headers=trans_headers,
+        json=trans_body
+    )
+
+    trans_data = trans_response.json()
+    translated_text = trans_data[0]["translations"][0]["text"]
+
+    return original_text, translated_text
+
+
 # -------------------------------------------------
 # BASIC PAGE ROUTES
 # -------------------------------------------------
@@ -357,6 +411,7 @@ def process_audio():
     try:
         print("🎧 Audio file received")
 
+        # 1️⃣ Validate upload
         if "audio_file" not in request.files:
             print("❌ No audio_file field in request")
             return redirect(url_for("input_page"))
@@ -367,12 +422,15 @@ def process_audio():
             print("❌ Empty filename")
             return redirect(url_for("input_page"))
 
+        # 2️⃣ Save raw audio
         raw_path = os.path.join(
-            UPLOAD_FOLDER, f"upload_{uuid.uuid4().hex}_{audio_file.filename}"
+            UPLOAD_FOLDER,
+            f"upload_{uuid.uuid4().hex}_{audio_file.filename}"
         )
         audio_file.save(raw_path)
         print(f"💾 Saved raw audio: {raw_path}")
 
+        # 3️⃣ Convert to WAV (Azure requirement)
         wav_path = raw_path.rsplit(".", 1)[0] + ".wav"
         subprocess.run(
             ["ffmpeg", "-y", "-i", raw_path, "-ac", "1", "-ar", "16000", wav_path],
@@ -380,34 +438,28 @@ def process_audio():
         )
         print(f"🎼 Converted to WAV: {wav_path}")
 
-        # Convert WAV to base64
-        with open(wav_path, "rb") as f:
-            audio_base64 = base64.b64encode(f.read()).decode("utf-8")
-
+        # 4️⃣ Language selection
         language_code = request.form.get("language", "en-IN")
+        print("🌍 Selected language:", language_code)
 
-        # Call existing /transcribe
-        with app.test_client() as client:
-            response = client.post(
-                "/transcribe",
-                json={"audio": audio_base64, "language": language_code}
-            )
+        # 5️⃣ Transcribe + translate (CORE FIX)
+        original_text, translated_text = transcribe_and_translate_wav(
+            wav_path,
+            language_code
+        )
 
-        if response.status_code != 200:
-            print("❌ Transcription failed")
+        print("📝 Original transcript:", original_text)
+        print("🌐 English transcript:", translated_text)
+
+        if not translated_text.strip():
+            print("❌ Empty transcription result")
             return redirect(url_for("input_page"))
 
-        data = response.get_json()
-        original_text = data.get("original_text", "")
-        translated_text = data.get("translated_text", "")
-
-        if not translated_text:
-            print("❌ Empty transcription")
-            return redirect(url_for("input_page"))
-
+        # 6️⃣ Store transcripts (for UI display later)
         session["original_transcript"] = original_text
         session["translated_transcript"] = translated_text
 
+        # 7️⃣ AI PIPELINE (English only)
         key_notes = generate_key_notes(translated_text)
         detailed_points = generate_detailed_points(translated_text)
         memory_map = generate_memory_map(translated_text)
@@ -418,6 +470,11 @@ def process_audio():
 
         print("✅ Audio pipeline complete")
         return redirect(url_for("result_page"))
+
+    except subprocess.CalledProcessError:
+        print("❌ FFmpeg failed")
+        traceback.print_exc()
+        return "Audio conversion failed", 500
 
     except Exception:
         print("❌ Error in /process-audio")
