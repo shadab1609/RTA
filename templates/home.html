@@ -6,277 +6,346 @@
 <title>Knowledge Synthesizer</title>
 
 <style>
-/* ---------- HIGH CONTRAST VARIABLES ---------- */
+/* ---------- DESIGN TOKENS ---------- */
 :root {
-    --bg: #02040a; 
+    --bg: #030508;
+    --panel-bg: rgba(20, 20, 25, 0.6);
+    --border: rgba(255, 255, 255, 0.12);
+    --border-highlight: rgba(255, 255, 255, 0.3);
     
-    /* Cards: Brighter surface, sharper borders */
-    --card-bg: rgba(255, 255, 255, 0.05);
-    --card-border: rgba(255, 255, 255, 0.15);
-    --card-highlight: rgba(255, 255, 255, 0.3); /* The "Glass Edge" */
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --text-mono: "SF Mono", "Fira Code", "Roboto Mono", monospace;
     
-    --text-main: #ffffff;
-    --text-muted: #a1a1aa;
+    --accent: #a855f7;
+    --accent-dim: rgba(168, 85, 247, 0.15);
     
-    --accent: #c084fc; 
-    --accent-glow: rgba(192, 132, 252, 0.5);
+    --grid-color: rgba(255, 255, 255, 0.03);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {
     background-color: var(--bg);
-    /* Spotlight Effect */
-    background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #02040a 80%);
-    color: var(--text-main);
+    color: var(--text-primary);
     overflow-x: hidden;
+    min-height: 100vh;
 }
 
-/* PARTICLES BACKGROUND */
-#particles-js {
+/* TECHNICAL GRID BACKGROUND */
+.grid-bg {
     position: fixed;
-    inset: 0;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
     z-index: 0;
     pointer-events: none;
+    mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
 }
 
-/* CONTENT LAYER */
+#particles-js {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* LAYOUT */
 .page {
     position: relative;
     z-index: 2;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
-/* HEADER */
-header {
-    padding: 1.5rem 3rem;
-    border-bottom: 1px solid var(--card-border);
-    backdrop-filter: blur(10px);
+/* NAVBAR */
+nav {
+    width: 100%;
+    max-width: 1200px;
+    padding: 1.5rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--border);
 }
 
-.logo {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: white;
-    text-shadow: 0 0 15px var(--accent-glow);
-    letter-spacing: -0.02em;
-}
-
-/* MAIN */
-main {
-    flex: 1;
-    max-width: 1200px;
-    margin: auto;
-    padding: 6rem 2rem;
-    text-align: center;
+.brand {
+    font-family: var(--text-mono);
+    font-size: 0.9rem;
+    letter-spacing: -0.5px;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    gap: 10px;
 }
 
-/* HERO */
+.brand::before {
+    content: "";
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+}
+
+.status {
+    font-family: var(--text-mono);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.02);
+}
+
+/* HERO SECTION */
 .hero {
-    margin-bottom: 5rem;
+    text-align: center;
+    padding: 6rem 1rem 4rem;
+    max-width: 900px;
 }
 
-.hero h1 {
-    font-size: 4rem;
-    font-weight: 800;
-    line-height: 1.1;
+.tagline {
+    font-family: var(--text-mono);
+    color: var(--accent);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     margin-bottom: 1.5rem;
-    text-shadow: 0 0 30px rgba(192, 132, 252, 0.3);
-    background: linear-gradient(to bottom right, #fff, #e9d5ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    padding: 6px 12px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(168,85,247, 0.3);
+    border-radius: 4px;
+}
+
+h1 {
+    font-size: 4rem;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
 }
 
 .hero p {
-    font-size: 1.3rem;
-    color: var(--text-muted);
-    max-width: 700px;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 600px;
     margin: 0 auto 3rem;
-    line-height: 1.6;
 }
 
-/* CTA BUTTON */
-.btn-primary {
-    padding: 1.2rem 3.5rem;
-    border-radius: 999px;
+/* CUSTOM BUTTON */
+.btn-main {
+    background: var(--text-primary);
+    color: #000;
+    padding: 1rem 2.5rem;
+    font-size: 1rem;
+    font-weight: 600;
     border: none;
-    background: var(--accent);
-    color: black; /* High Contrast Black on Neon */
-    font-size: 1.1rem;
-    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 0 25px var(--accent-glow);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    border-radius: 2px; /* Sharper corners */
 }
 
-.btn-primary:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 0 40px var(--accent-glow);
-    background: #d8b4fe;
+.btn-main::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 2px;
+    background: var(--accent);
 }
 
-/* FEATURES GRID */
-.features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+.btn-main:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -10px rgba(255,255,255,0.3);
+}
+
+/* PIPELINE VISUALIZATION (Replacing generic cards) */
+.pipeline {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 20px;
+    max-width: 1100px;
     width: 100%;
+    padding: 2rem;
+    margin-top: 2rem;
+    position: relative;
 }
 
-.feature {
-    padding: 2.5rem;
-    border-radius: 24px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-top: 1px solid var(--card-highlight); /* Glass Top Highlight */
+/* The Connecting Line */
+.pipeline::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 40px;
+    right: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--border-highlight) 20%, 
+        var(--border-highlight) 80%, 
+        transparent 100%
+    );
+    z-index: 0;
+}
+
+.step {
+    flex: 1;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
     backdrop-filter: blur(12px);
-    text-align: left;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+    transition: 0.3s;
 }
 
-.feature:hover {
+/* Custom "Notches" on corners */
+.step::before {
+    content: "";
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 10px; height: 10px;
+    border-top: 1px solid var(--text-primary);
+    border-left: 1px solid var(--text-primary);
+}
+
+.step:hover {
+    border-color: var(--accent);
     transform: translateY(-5px);
-    border-color: rgba(255,255,255,0.25);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
 }
 
-.feature h3 {
-    font-size: 1.4rem;
-    margin-bottom: 1rem;
-    color: #fff;
-    font-weight: 700;
+.step-icon {
+    width: 50px;
+    height: 50px;
+    background: #000;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    position: relative;
 }
 
-.feature p {
-    font-size: 1.05rem;
-    color: var(--text-muted);
-    line-height: 1.6;
+.step h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.step p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
 }
 
 /* FOOTER */
 footer {
+    margin-top: 5rem;
     padding: 2rem;
+    font-family: var(--text-mono);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border);
+    width: 100%;
     text-align: center;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    border-top: 1px solid var(--card-border);
-    background: rgba(0,0,0,0.2);
 }
 
 /* RESPONSIVE */
-@media (max-width: 768px) {
-    .hero h1 {
-        font-size: 2.8rem;
+@media (max-width: 800px) {
+    h1 { font-size: 2.5rem; }
+    .pipeline { flex-direction: column; gap: 1rem; }
+    .pipeline::before { 
+        width: 1px; height: 100%; left: 50%; top: 0; 
+        background: linear-gradient(180deg, transparent, var(--border), transparent);
     }
-    header {
-        padding: 1.5rem;
-        justify-content: center;
-    }
-    .features {
-        grid-template-columns: 1fr;
-    }
-    main {
-        padding: 4rem 1.5rem;
-    }
+    .step { text-align: center; display: flex; flex-direction: column; align-items: center; }
 }
 </style>
 </head>
 
 <body>
+    
+    <div class="grid-bg"></div>
+    <div id="particles-js"></div>
 
-<div id="particles-js"></div>
+    <div class="page">
+        
+        <nav>
+            <div class="brand">KNOWLEDGE_SYNTHESIZER</div>
+            <div class="status">SYSTEM ONLINE</div>
+        </nav>
 
-<div class="page">
-
-<header>
-    <div class="logo">Knowledge Synthesizer</div>
-</header>
-
-<main>
-
-    <section class="hero">
-        <h1>Turn Discussions<br>into Structured Knowledge</h1>
-        <p>
-            An AI-powered system that converts unstructured classroom
-            conversations into key points, arguments, counterarguments,
-            and visual knowledge maps.
-        </p>
-
-        <a href="/input">
-            <button class="btn-primary">Start Synthesizing</button>
-        </a>
-    </section>
-
-    <section class="features">
-        <div class="feature">
-            <h3>🎙️ Speech & Text Ingestion</h3>
+        <section class="hero">
+            <span class="tagline">v1.0.0 // AI Architecture</span>
+            <h1>Structure Your<br>Conversations</h1>
             <p>
-                Seamlessly accepts live audio, recordings, or raw text transcripts
-                from real classroom environments, supporting multiple languages.
+                Transform raw classroom noise into structured semantic graphs.
+                Identify arguments, isolate risks, and visualize connections.
             </p>
+            <a href="/input">
+                <button class="btn-main">INITIALIZE SYSTEM</button>
+            </a>
+        </section>
+
+        <div class="pipeline">
+            
+            <div class="step">
+                <div class="step-icon">I/O</div>
+                <h3>Ingest Data</h3>
+                <p>Accepts Multi-Lingual Audio streams or raw text. Processes Hindi, Odia, and English via Azure.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-icon">CPU</div>
+                <h3>Logic Core</h3>
+                <p>Llama-3 extracts semantic relationships. Classifies data into Concepts, Arguments, and Outcomes.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-icon">GUI</div>
+                <h3>Visual Graph</h3>
+                <p>Renders a force-directed interactive map. Connects nodes dynamically for spatial learning.</p>
+            </div>
+
         </div>
 
-        <div class="feature">
-            <h3>🧠 AI Reasoning Layer</h3>
-            <p>
-                Goes beyond summarization. The AI extracts concepts, arguments, 
-                counterpoints, and open questions to model true understanding.
-            </p>
-        </div>
+        <footer>
+            Team RTA // Hackathon Build 2026
+        </footer>
+    </div>
 
-        <div class="feature">
-            <h3>🕸️ Knowledge Maps</h3>
-            <p>
-                Generates interactive, force-directed graphs that reveal how ideas 
-                connect, support, or contradict each other visually.
-            </p>
-        </div>
-    </section>
-
-</main>
-
-<footer>
-    24-Hour Hackathon Prototype · Team RTA
-</footer>
-
-</div>
-
-<script src="/static/js/particles.min.js"></script>
-<script>
-window.onload = function () {
-  particlesJS("particles-js", {
-    particles: {
-      number: { value: 100, density: { enable: true, value_area: 800 } },
-      color: { value: "#a855f7" },
-      shape: { type: "circle" },
-      opacity: { value: 0.5, random: true },
-      size: { value: 3, random: true },
-      line_linked: { enable: true, distance: 150, color: "#a855f7", opacity: 0.2, width: 1 },
-      move: { enable: true, speed: 1, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
-    },
-    interactivity: {
-      detect_on: "canvas",
-      events: { onhover: { enable: true, mode: "bubble" }, onclick: { enable: true, mode: "push" }, resize: true },
-      modes: { bubble: { distance: 200, size: 6, duration: 2, opacity: 0.8, speed: 3 }, push: { particles_nb: 4 } }
-    },
-    retina_detect: true
-  });
-};
-</script>
-
+    <script src="/static/js/particles.min.js"></script>
+    <script>
+        window.onload = function () {
+            particlesJS("particles-js", {
+                particles: {
+                    number: { value: 60, density: { enable: true, value_area: 800 } },
+                    color: { value: "#ffffff" },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.3, random: true },
+                    size: { value: 2, random: true },
+                    line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.1, width: 1 },
+                    move: { enable: true, speed: 0.5 }
+                },
+                retina_detect: true
+            });
+        };
+    </script>
 </body>
 </html>
