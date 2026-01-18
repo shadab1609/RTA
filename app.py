@@ -272,45 +272,55 @@ def regenerate_memory_map(text, refinement_context):
     print("🔁 Regenerating memory map with refinement")
 
     prompt = f"""
-You are an AI system that builds MEMORY MAPS of discussions.
+You are an AI system that updates knowledge graphs.
 
-Original task:
-Convert the discussion into a structured knowledge graph that preserves
-how ideas, actions, and outcomes are connected.
-
-User refinement:
-{refinement_context}
-
-Guidance:
-- Increase structural clarity based on the refinement
-- Add detail only where it improves understanding
-- Prefer explicit relationships (who does what, under what conditions)
-
-Rules:
-- Output ONLY valid JSON
-- Do NOT explain
-- Do NOT summarize
-- Max 35 nodes
-
-JSON format:
-{{
-  "nodes": [...],
-  "edges": [...]
-}}
-
-Discussion:
+Original Discussion Context:
 {text}
-"""
 
+USER INSTRUCTION (Follow this strictly):
+"{refinement_context}"
+
+TASK:
+Generate a NEW knowledge graph based on the User Instruction.
+
+STRICT SCHEMA RULES:
+1. Nodes MUST have exactly these fields: "id", "label", "type".
+2. "type" MUST be one of: [concept, argument, concern, outcome].
+3. Edges MUST have exactly these fields: "from", "to", "relation".
+4. Do NOT add "description", "color", or any other fields.
+5. Max 35 nodes.
+
+Output ONLY valid JSON:
+{{
+  "nodes": [
+    {{"id": "n1", "label": "Short Label", "type": "concept"}}
+  ],
+  "edges": [
+    {{"from": "n1", "to": "n2", "relation": "leads_to"}}
+  ]
+}}
+"""
+    # Use a higher temperature for creativity, but strict parsing
     raw_output = call_together(prompt)
 
     try:
+        # Sanitize code blocks if the AI adds them
+        if "```json" in raw_output:
+            raw_output = raw_output.split("```json")[1].split("```")[0].strip()
+        elif "```" in raw_output:
+            raw_output = raw_output.split("```")[1].split("```")[0].strip()
+
         graph = json.loads(raw_output)
+        
+        # BASIC VALIDATION
+        if "nodes" not in graph: graph["nodes"] = []
+        if "edges" not in graph: graph["edges"] = []
+        
         print("✅ Refined memory map parsed")
         return graph
     except Exception:
         print("❌ Failed to parse refined memory map")
-        print(raw_output)
+        print(raw_output) # Print to debug
         return {"nodes": [], "edges": []}
 
 @app.route('/translate_text', methods=['POST'])
@@ -455,31 +465,33 @@ def transcribe_audio_base64():
 def process_text():
     try:
         input_text = request.form.get("discussion_text", "").strip()
-        print("📥 Received text input")
-
         if not input_text:
-            print("⚠️ Empty input received")
             return redirect(url_for("input_page"))
         
         session["source_text"] = input_text
         
-        # 1. Generate AI outputs
+        # Generate AI outputs
         key_notes = generate_key_notes(input_text)
         detailed_points = generate_detailed_points(input_text)
         initial_map = generate_memory_map(input_text)
         
-        # 2. Store Map as a LIST (History support)
-        session["memory_maps"] = [initial_map]  # <--- CHANGED: List initialization
+        # STORE DATA + CONTEXT
+        # We now store a dictionary for each page
+        session["memory_maps"] = [{
+            "data": initial_map,
+            "context": "Original Discussion"
+        }]
+        
         session["key_notes"] = key_notes
         session["detailed_points"] = detailed_points
 
-        print("✅ AI outputs stored in session (Page 1)")
         return redirect(url_for("result_page"))
 
-    except Exception as e:
-        print("❌ Error in /process-text")
+    except Exception:
         traceback.print_exc()
-        return "Internal error during processing", 500
+        return "Error", 500
+
+
 @app.route("/process-audio", methods=["POST"])
 def process_audio():
     try:
@@ -613,7 +625,6 @@ def process_mic():
 @app.route("/result", methods=["GET", "POST"])
 def result_page():
     try:
-        # Get the list of maps (default to empty list)
         maps_history = session.get("memory_maps", [])
         open_map = False
 
@@ -624,15 +635,15 @@ def result_page():
             if refinement and source_text:
                 print(f"🔁 Generating Map Page {len(maps_history) + 1}")
                 
-                # Generate NEW map based on refinement
                 new_map = regenerate_memory_map(source_text, refinement)
                 
-                # Append to history instead of overwriting
-                maps_history.append(new_map)
-                session["memory_maps"] = maps_history 
-                session["last_refinement"] = refinement
+                # Append NEW map with USER'S prompt
+                maps_history.append({
+                    "data": new_map,
+                    "context": refinement  # <--- SAVE THE PROMPT HERE
+                })
                 
-                # Force session save (crucial for filesystem sessions)
+                session["memory_maps"] = maps_history 
                 session.modified = True 
                 open_map = True
 
@@ -640,15 +651,13 @@ def result_page():
             "result.html",
             key_notes=session.get("key_notes", ""),
             detailed_points=session.get("detailed_points", ""),
-            memory_maps=maps_history,  # <--- PASS THE LIST
+            memory_maps=maps_history,
             open_map=open_map
         )
 
     except Exception:
-        print("❌ Error loading / regenerating result")
         traceback.print_exc()
         return "Result page error", 500
-
 
 
 # -------------------------------------------------
