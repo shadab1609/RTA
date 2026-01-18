@@ -458,6 +458,65 @@ def transcribe_audio_base64():
         return jsonify({"error": str(e)}), 500
 
 # -------------------------------------------------
+# CHATBOT ROUTE (Mistral 7B)
+# -------------------------------------------------
+@app.route("/chat", methods=["POST"])
+def chat_with_map():
+    try:
+        data = request.get_json()
+        user_query = data.get("message", "")
+        # The frontend sends the specific map the user is looking at
+        current_map = data.get("current_map", {}) 
+        discussion_context = session.get("detailed_points", "")
+
+        print("💬 Chat Query:", user_query)
+
+        # CONSTRUCT THE CONTEXT
+        # We explicitly teach the AI the color coding here 👇
+        system_prompt = f"""
+You are an intelligent assistant helping a student understand a Knowledge Graph (Memory Map).
+
+CONTEXT DATA:
+1. Discussion Summary:
+{discussion_context}
+
+2. Current Knowledge Graph (JSON):
+{json.dumps(current_map)}
+
+VISUAL LEGEND (Crucial):
+- "concept" nodes are shown in PURPLE.
+- "argument" nodes are shown in GREEN.
+- "concern" nodes are shown in RED.
+- "outcome" nodes are shown in BLUE.
+- Dashed lines represent "challenges".
+
+INSTRUCTIONS:
+- Answer the user's question using the Graph and Summary.
+- If asked about relationships, trace the "edges" in the JSON.
+- If asked about colors, use the Visual Legend.
+- Keep answers concise and helpful.
+"""
+
+        # CALL TOGETHER.AI (Mistral-7B)
+        response = client.chat.completions.create(
+            model="mistralai/Mistral-7B-Instruct-v0.2",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_query}
+            ],
+            temperature=0.7,
+            max_tokens=512
+        )
+
+        answer = response.choices[0].message.content.strip()
+        return jsonify({"reply": answer})
+
+    except Exception as e:
+        print(f"❌ Chat Error: {e}")
+        traceback.print_exc()
+        return jsonify({"reply": "I'm having trouble analyzing the map right now."}), 500
+
+# -------------------------------------------------
 # PROCESS TEXT INPUT
 # -------------------------------------------------
 
@@ -616,6 +675,8 @@ def process_mic():
         print("❌ Error in /process-mic")
         traceback.print_exc()
         return jsonify({"error": "Mic processing failed"}), 500
+
+
 
 
 # -------------------------------------------------
