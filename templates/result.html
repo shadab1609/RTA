@@ -6,16 +6,22 @@
 <title>Results – Knowledge Synthesizer</title>
 
 <style>
-/* ---------- VARIABLES & RESET ---------- */
+/* ---------- HIGH CONTRAST VARIABLES ---------- */
 :root {
-    --bg: #050814;
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --card-border: rgba(255, 255, 255, 0.08);
+    --bg: #02040a; 
+    
+    /* Cards: Brighter surface, sharper borders */
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.15);
+    --card-highlight: rgba(255, 255, 255, 0.3);
+    
     --text-main: #ffffff;
-    --text-muted: #9ca3af;
-    --accent: #a855f7;
-    --accent-glow: rgba(168, 85, 247, 0.4);
-    --nav-height: 70px; 
+    --text-muted: #a1a1aa;
+    
+    --accent: #c084fc; 
+    --accent-glow: rgba(192, 132, 252, 0.5);
+    
+    --nav-height: 70px;
 }
 
 * {
@@ -27,6 +33,7 @@
 
 body {
     background-color: var(--bg);
+    background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #02040a 80%);
     color: var(--text-main);
     height: 100vh;
     overflow: hidden;
@@ -81,7 +88,7 @@ body {
     color: var(--text-main);
     border-color: var(--accent);
     background: rgba(168,85,247,0.1);
-    box-shadow: 0 0 15px var(--accent-glow);
+    box-shadow: 0 0 25px var(--accent-glow), inset 0 0 10px rgba(168,85,247,0.1);
 }
 
 /* ---------- MAIN CONTENT ---------- */
@@ -105,8 +112,9 @@ body {
 
 /* ---------- CARD STYLES ---------- */
 .card {
-    background: rgba(13, 17, 34, 0.6);
+    background: var(--card-bg);
     border: 1px solid var(--card-border);
+    border-top: 1px solid var(--card-highlight);
     border-radius: 24px;
     padding: 2rem;
     cursor: pointer;
@@ -116,32 +124,29 @@ body {
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    height: 600px; /* Fixed height for desktop */
+    height: 600px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-/* Hover effect ONLY when not expanded */
 .page-wrapper:not(.expanded) .card:hover {
     transform: translateY(-8px);
-    border-color: rgba(255,255,255,0.2);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.4);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* Expanded State (Desktop) */
 .page-wrapper.expanded .cards {
     grid-template-columns: 1fr;
     height: 100%;
 }
 
-.page-wrapper.expanded .card {
-    display: none;
-}
+.page-wrapper.expanded .card { display: none; }
 
 .page-wrapper.expanded .card.active {
     display: flex;
     height: 100%;
     cursor: default;
     transform: none;
-    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    box-shadow: 0 0 50px rgba(0,0,0,0.6);
     border-color: var(--accent);
 }
 
@@ -155,14 +160,12 @@ body {
 .card h2 {
     font-size: 1.8rem;
     margin-bottom: 0.2rem;
-    background: linear-gradient(to right, #fff, #c4b5fd);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    text-shadow: 0 0 20px rgba(192, 132, 252, 0.4);
+    color: white;
 }
 
-.card p {
-    color: var(--text-muted);
-}
+.card p { color: var(--text-muted); }
 
 .content {
     display: none;
@@ -183,7 +186,6 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ---------- CONTENT TEXT ---------- */
 pre {
     white-space: pre-wrap;
     font-family: 'Inter', sans-serif;
@@ -200,23 +202,21 @@ pre {
     gap: 1rem;
 }
 
-/* Map Wrapper */
 .graph-wrapper {
     flex: 1;
     border-radius: 16px;
     border: 1px dashed var(--card-border);
-    background: rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.3);
     position: relative;
     overflow: hidden;
     min-height: 350px;
 }
 
-/* Map Controls */
 .fullscreen-btn {
     position: absolute;
     top: 15px;
     right: 15px;
-    background: rgba(0,0,0,0.6);
+    background: rgba(255,255,255,0.1);
     border: 1px solid var(--card-border);
     color: white;
     width: 36px;
@@ -229,29 +229,28 @@ pre {
     z-index: 10;
     transition: 0.2s;
     font-size: 1.2rem;
+    font-weight: bold;
 }
+.fullscreen-btn:hover { background: var(--accent); color: black; }
 
 .map-nav {
-    display: flex; 
-    gap: 10px; 
-    align-items: center;
+    display: flex; gap: 10px; align-items: center;
 }
 
 .nav-arrow {
     background: rgba(255,255,255,0.1);
     border: 1px solid var(--card-border);
     color: white;
-    width: 30px; 
-    height: 30px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     cursor: pointer;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
 }
-.nav-arrow:disabled { opacity: 0.3; cursor: default; }
+.nav-arrow:hover { background: var(--accent); color: black; }
+.nav-arrow:disabled { opacity: 0.3; background: transparent; color: white; cursor: default; }
 
-/* Control Deck (Chat + Regen) */
+/* Control Deck */
 .desktop-controls {
     display: flex;
     gap: 1.5rem;
@@ -260,15 +259,15 @@ pre {
 
 .panel {
     flex: 1;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255,255,255,0.05);
     border: 1px solid var(--card-border);
+    border-top: 1px solid var(--card-highlight);
     border-radius: 16px;
     padding: 1rem;
     display: flex;
     flex-direction: column;
 }
 
-/* Chat Styles */
 .chat-window {
     flex: 1;
     overflow-y: auto;
@@ -285,181 +284,72 @@ pre {
     line-height: 1.4;
     max-width: 90%;
 }
-.msg.ai { background: rgba(255,255,255,0.05); border-top-left-radius: 2px; align-self: flex-start; }
-.msg.user { background: rgba(168,85,247,0.25); border-bottom-right-radius: 2px; align-self: flex-end; }
+.msg.ai { background: rgba(255,255,255,0.1); border-top-left-radius: 2px; align-self: flex-start; }
+.msg.user { background: rgba(192, 132, 252, 0.3); border-bottom-right-radius: 2px; align-self: flex-end; }
 
 input, textarea {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--card-border);
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.2);
     color: white;
     padding: 0.8rem;
     border-radius: 10px;
     outline: none;
     width: 100%;
 }
-input:focus, textarea:focus { border-color: var(--accent); }
+input:focus, textarea:focus { border-color: var(--accent); background: rgba(0,0,0,0.9); }
 
 .btn {
     background: var(--accent);
-    color: white;
+    color: black;
     border: none;
     padding: 0.8rem 1.2rem;
     border-radius: 10px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
     white-space: nowrap;
+    box-shadow: 0 0 15px var(--accent-glow);
 }
+.btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
-/* ---------- MOBILE RESPONSIVE FIXES ---------- */
+/* ---------- MOBILE RESPONSIVE ---------- */
 @media (max-width: 768px) {
     body { height: 100vh; overflow: hidden; } 
     .page-wrapper { padding: 0; display: block; }
     
-    /* 1. NAVBAR (1/8th Fixed Bottom) */
     .sidebar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: var(--nav-height);
-        flex-direction: row;
-        justify-content: space-around;
-        background: rgba(5, 8, 20, 0.95);
-        backdrop-filter: blur(20px);
-        border-top: 1px solid var(--card-border);
-        padding: 0;
-        z-index: 1000;
+        position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
+        flex-direction: row; justify-content: space-around;
+        background: rgba(5, 8, 20, 0.95); backdrop-filter: blur(20px);
+        border-top: 1px solid var(--card-border); padding: 0; z-index: 1000;
     }
 
     .side-tab {
-        writing-mode: horizontal-tb;
-        transform: none;
-        background: transparent;
-        border: none;
-        border-radius: 0;
-        padding: 5px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-        gap: 4px;
+        writing-mode: horizontal-tb; transform: none; background: transparent; border: none; border-radius: 0;
+        padding: 5px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-size: 0.7rem; gap: 4px; box-shadow: none;
     }
     .side-tab.active { background: linear-gradient(to bottom, rgba(168,85,247,0.1), transparent); border-top: 2px solid var(--accent); }
     .tab-icon { font-size: 1.5rem; display: block; }
 
-    /* 2. MAIN CONTAINER */
-    .main {
-        height: calc(100vh - var(--nav-height)); /* 7/8th of screen */
-        padding: 0;
-        align-items: flex-start;
-        overflow: hidden;
-    }
-
+    .main { height: calc(100vh - var(--nav-height)); padding: 0; align-items: flex-start; overflow: hidden; }
     .cards { display: block; height: 100%; }
     
-    .card.active {
-        height: 100%;
-        border-radius: 0;
-        border: none;
-        background: transparent;
-        padding: 0;
-    }
+    .card.active { height: 100%; border-radius: 0; border: none; background: transparent; padding: 0; }
+    #notes.active, #details.active { overflow-y: auto; padding: 1.5rem; }
 
-    /* Text Sections */
-    #notes.active, #details.active {
-        overflow-y: auto;
-        padding: 1.5rem;
-    }
+    #map.active .content { height: 100%; margin: 0; display: flex; flex-direction: column; }
+    #map.active .map-container { height: 100%; gap: 0; }
 
-    /* 3. MAP LAYOUT (6/8 - 1/8 - 1/8) */
-    #map.active .content {
-        height: 100%;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-    }
+    .graph-wrapper { flex: 1; border-radius: 0 0 20px 20px; border-bottom: 1px solid var(--card-border); min-height: 0; }
+    .graph-wrapper.fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: calc(100vh - var(--nav-height)); z-index: 500; background: var(--bg); border-radius: 0; }
 
-    #map.active .map-container {
-        height: 100%;
-        gap: 0;
-    }
-
-    /* MAP SECTION (Prioritized Space) */
-    .graph-wrapper {
-        flex: 1; /* Takes all remaining space above controls */
-        border-radius: 0 0 20px 20px;
-        border-bottom: 1px solid var(--card-border);
-        min-height: 0; /* Important for flex scaling */
-    }
+    .desktop-controls { height: 250px; flex-shrink: 0; flex-direction: row; background: #050814; padding: 0.75rem; gap: 0.75rem; overflow: hidden; }
+    .panel.chat-panel-mobile { flex: 6; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 12px; display: flex; flex-direction: column; }
+    .panel.regen-panel-mobile { flex: 4; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .chat-window { height: 60px; font-size: 0.8rem; }
     
-    .graph-wrapper.fullscreen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: calc(100vh - var(--nav-height));
-        z-index: 500;
-        background: var(--bg);
-        border-radius: 0;
-    }
-
-    /* 4. CONTROL DECK (PARALLEL & TALLER)
-       Requested: "Horizontally parallel... at least 7 lines for chatbot"
-    */
-    .desktop-controls {
-        height: 250px; /* Fixed height ~ 1/4th screen */
-        flex-shrink: 0; /* Prevent shrinking */
-        flex-direction: row; /* Side-by-Side */
-        background: #050814;
-        padding: 0.75rem;
-        gap: 0.75rem;
-        overflow: hidden;
-    }
-
-    /* Chat Panel (60% Width) */
-    .panel.chat-panel-mobile {
-        flex: 6; 
-        background: rgba(255,255,255,0.03);
-        border: 1px solid var(--card-border);
-        padding: 0.5rem;
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    /* Regen Panel (40% Width) */
-    .panel.regen-panel-mobile {
-        flex: 4;
-        background: rgba(255,255,255,0.03);
-        border: 1px solid var(--card-border);
-        padding: 0.5rem;
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end; /* Align bottom */
-    }
-
-    /* Chat Window inside Panel */
-    .chat-window {
-        flex: 1;
-        height: 100%; /* Fill the panel */
-        overflow-y: auto;
-        margin-bottom: 5px;
-        font-size: 0.8rem;
-    }
-
-    /* Adjust inputs for tight space */
-    .panel input, .panel textarea {
-        font-size: 0.8rem;
-        padding: 6px;
-    }
-    .panel .btn {
-        padding: 6px 10px;
-        font-size: 0.8rem;
-    }
-    
+    .panel input, .panel textarea { font-size: 0.8rem; padding: 6px; }
+    .panel .btn { padding: 6px 10px; font-size: 0.8rem; }
     #map.active .card-header { display: none; }
 }
 </style>
@@ -487,29 +377,19 @@ input:focus, textarea:focus { border-color: var(--accent); }
 
         <div class="main">
             <div class="cards">
-
                 <div class="card" id="notes" onclick="expand('notes')">
-                    <div class="card-header">
-                        <h2>Key Notes</h2>
-                    </div>
-                    <div class="content">
-                        <pre>{{ key_notes }}</pre>
-                    </div>
+                    <div class="card-header"><h2>Key Notes</h2></div>
+                    <div class="content"><pre>{{ key_notes }}</pre></div>
                 </div>
 
                 <div class="card" id="details" onclick="expand('details')">
-                    <div class="card-header">
-                        <h2>Detailed Analysis</h2>
-                    </div>
-                    <div class="content">
-                        <p>{{ detailed_points }}</p>
-                    </div>
+                    <div class="card-header"><h2>Detailed Analysis</h2></div>
+                    <div class="content"><p>{{ detailed_points }}</p></div>
                 </div>
 
                 <div class="card" id="map" onclick="expand('map')">
                     <div class="card-header">
                         <h2>Memory Map</h2>
-                        
                         <div class="map-nav" id="mapNav" style="display:none;" onclick="event.stopPropagation()">
                             <button class="nav-arrow" id="btnPrev" onclick="changeMap(-1)">←</button>
                             <span id="mapCounter" style="font-size:0.9rem; color:#d8b4fe;">Page 1/1</span>
@@ -519,18 +399,15 @@ input:focus, textarea:focus { border-color: var(--accent); }
 
                     <div class="content" onclick="event.stopPropagation()">
                         <div class="map-container">
-                            
                             <div class="graph-wrapper" id="graphContainer">
                                 <div class="fullscreen-btn" onclick="toggleFullscreen()">⛶</div>
                                 <div id="graph" style="width:100%; height:100%;"></div>
-                                
-                                <div style="position:absolute; top:15px; left:15px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:6px; font-size:0.75rem; pointer-events:none;">
+                                <div style="position:absolute; top:15px; left:15px; background:rgba(0,0,0,0.8); padding:4px 8px; border-radius:6px; font-size:0.75rem; pointer-events:none; border:1px solid rgba(255,255,255,0.2);">
                                     <span id="mapContextText" style="color:#d8b4fe;">Original Discussion</span>
                                 </div>
                             </div>
 
                             <div class="desktop-controls" id="mobileControls">
-                                
                                 <div class="panel chat-panel-mobile">
                                     <div class="chat-window" id="chatMessages">
                                         <div class="msg ai">Ask me about the map!</div>
@@ -542,16 +419,15 @@ input:focus, textarea:focus { border-color: var(--accent); }
                                 </div>
 
                                 <div class="panel regen-panel-mobile">
-                                    <div style="flex:1;"></div> <span style="font-size:0.7rem; color:#9ca3af; margin-bottom:4px;">New Page Topic:</span>
+                                    <div style="flex:1;"></div>
+                                    <span style="font-size:0.7rem; color:#9ca3af; margin-bottom:4px;">New Page Topic:</span>
                                     <textarea id="refineInput" rows="2" placeholder="e.g. Risks..." style="resize:none; margin-bottom:0.5rem; height:50px;"></textarea>
                                     <button class="btn" id="regenBtn" onclick="regenerateMap()" style="width:100%;">Create</button>
                                 </div>
-
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -560,7 +436,7 @@ input:focus, textarea:focus { border-color: var(--accent); }
     <script src="/static/js/particles.min.js"></script>
 
     <script>
-        // --- 1. PARTICLES & AUTO-OPEN LOGIC ---
+        // INIT
         window.onload = function () {
             particlesJS("particles-js", {
                 particles: {
@@ -573,15 +449,15 @@ input:focus, textarea:focus { border-color: var(--accent); }
                 }
             });
             
-            // AUTO-OPEN: Skip the "3 Cards" screen completely
+            // AUTO OPEN - Skip intermediate screen
             {% if open_map %}
                 setTimeout(() => expand('map'), 100);
             {% else %}
-                setTimeout(() => expand('notes'), 100); // Default to notes
+                setTimeout(() => expand('notes'), 100);
             {% endif %}
         };
 
-        // --- 2. FULLSCREEN TOGGLE ---
+        // FULLSCREEN
         function toggleFullscreen() {
             const wrapper = document.getElementById('graphContainer');
             const controls = document.getElementById('mobileControls');
@@ -590,7 +466,6 @@ input:focus, textarea:focus { border-color: var(--accent); }
             wrapper.classList.toggle('fullscreen');
             
             if(wrapper.classList.contains('fullscreen')) {
-                // On mobile, hide controls to give full space
                 if(window.innerWidth <= 768) controls.style.display = 'none';
                 btn.innerText = "✖";
                 btn.style.background = "#ef4444";
@@ -599,11 +474,10 @@ input:focus, textarea:focus { border-color: var(--accent); }
                 btn.innerText = "⛶";
                 btn.style.background = "";
             }
-            // Trigger D3 resize logic
             setTimeout(renderGraph, 100);
         }
 
-        // --- 3. NAVIGATION & STATE ---
+        // NAV
         const allMaps = {{ memory_maps | tojson }} || [];
         let currentMapIndex = allMaps.length > 0 ? allMaps.length - 1 : 0; 
 
@@ -611,35 +485,25 @@ input:focus, textarea:focus { border-color: var(--accent); }
             const layout = document.getElementById("layout");
             const tabs = document.querySelectorAll(".side-tab");
             
-            // UI Reset
             document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
             tabs.forEach(t => t.classList.remove("active"));
             
-            // Activate
             document.getElementById(id).classList.add("active");
             layout.classList.add("expanded");
             
-            // Highlight Tab
             const map = {'notes':0, 'details':1, 'map':2};
             if(tabs[map[id]]) tabs[map[id]].classList.add("active");
 
-            // Safe Map Render
             if (id === "map") {
                 updateMapUI();
-                // RETRY LOGIC: Wait until container has width
-                attemptRender();
+                attemptRender(); // Retry rendering
             }
         }
 
-        // --- 4. ROBUST RENDER RETRY ---
         function attemptRender() {
             const el = document.getElementById("graph");
-            if(el.clientWidth > 0) {
-                renderGraph();
-            } else {
-                // If hidden/zero width, retry quickly
-                setTimeout(attemptRender, 50);
-            }
+            if(el.clientWidth > 0) renderGraph();
+            else setTimeout(attemptRender, 50);
         }
 
         function updateMapUI() {
@@ -672,7 +536,6 @@ input:focus, textarea:focus { border-color: var(--accent); }
             }
         }
 
-        // --- 5. BACKEND CALLS ---
         async function sendChat() {
             const input = document.getElementById("chatInput");
             const msgs = document.getElementById("chatMessages");
@@ -708,19 +571,14 @@ input:focus, textarea:focus { border-color: var(--accent); }
             } catch(e){ console.error(e); btn.disabled=false; }
         }
 
-        // --- 6. D3 GRAPH RENDERER ---
         function renderGraph() {
             const entry = allMaps[currentMapIndex];
             const data = entry ? entry.data : {nodes:[], edges:[]};
             const el = document.getElementById("graph");
-            
-            // Ensure we have size
-            const w = el.clientWidth;
-            const h = el.clientHeight;
-            if (w === 0 || h === 0) return; // Wait for retry loop
+            const w = el.clientWidth, h = el.clientHeight;
+            if (w === 0 || h === 0) return;
 
             el.innerHTML = "";
-            
             if(!data.nodes || data.nodes.length === 0) {
                 el.innerHTML = "<div style='display:flex;height:100%;align-items:center;justify-content:center;color:#666;'>No Data</div>";
                 return;
@@ -728,7 +586,6 @@ input:focus, textarea:focus { border-color: var(--accent); }
 
             const svg = d3.select("#graph").append("svg").attr("width", w).attr("height", h);
             const g = svg.append("g");
-            
             const color = {concept:"#a855f7", argument:"#22c55e", concern:"#ef4444", outcome:"#3b82f6"};
             const ids = new Set(data.nodes.map(n=>n.id));
             const links = [];
@@ -738,10 +595,10 @@ input:focus, textarea:focus { border-color: var(--accent); }
             });
 
             const sim = d3.forceSimulation(data.nodes)
-                .force("link", d3.forceLink(links).id(d=>d.id).distance(100))
+                .force("link", d3.forceLink(links).id(d=>d.id).distance(120))
                 .force("charge", d3.forceManyBody().strength(-200))
                 .force("center", d3.forceCenter(w/2, h/2))
-                .force("collide", d3.forceCollide().radius(25));
+                .force("collide", d3.forceCollide().radius(35));
 
             const link = g.append("g").selectAll("line").data(links).enter().append("line")
                 .attr("stroke", "#9ca3af").attr("stroke-width", 1.5)
@@ -753,9 +610,10 @@ input:focus, textarea:focus { border-color: var(--accent); }
                 .on("drag", (e,d)=>{d.fx=e.x;d.fy=e.y})
                 .on("end", (e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
 
+            // FIXED TRUNCATION HERE: Increased from 12 to 20
             const label = g.append("g").selectAll("text").data(data.nodes).enter().append("text")
                 .attr("font-size", "10px").attr("fill", "#e5e7eb").attr("text-anchor", "middle").attr("dy", 25)
-                .text(d=>d.label.length>12?d.label.substring(0,12)+"...":d.label);
+                .text(d=>d.label.length > 20 ? d.label.substring(0, 20) + "..." : d.label);
             
             label.append("title").text(d=>d.label);
 
@@ -764,7 +622,6 @@ input:focus, textarea:focus { border-color: var(--accent); }
                 node.attr("cx",d=>d.x).attr("cy",d=>d.y);
                 label.attr("x",d=>d.x).attr("y",d=>d.y);
             });
-            
             svg.call(d3.zoom().scaleExtent([0.1,4]).on("zoom", e=>g.attr("transform", e.transform)));
         }
     </script>
