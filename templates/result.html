@@ -120,7 +120,7 @@ body {
     display: none;
     margin-top: 2rem;
     line-height: 1.7;
-    flex: 1; /* Allows content to fill space */
+    flex: 1;
 }
 
 /* ---------- EXPANDED MODE ---------- */
@@ -144,30 +144,55 @@ body {
     display: block;
 }
 
-/* ---------- GRAPH ---------- */
+/* ---------- GRAPH UI ---------- */
 .graph-box {
-    height: 65vh;
+    height: 60vh;
     width: 100%;
     margin-top: 1rem;
     border-radius: 18px;
     border: 1px dashed var(--border);
     background: rgba(0,0,0,0.2);
-    overflow: hidden; /* Important for D3 zoom */
+    overflow: hidden;
+    position: relative;
 }
 
-/* ---------- CONTROLS ---------- */
+/* Context Badge (Verification) */
+.context-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(0,0,0,0.6);
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: #e5e7eb;
+    max-width: 80%;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+.context-label {
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 2px;
+}
+
 .map-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.map-badge {
+.page-badge {
     background: rgba(168,85,247,0.2);
     color: #d8b4fe;
-    padding: 2px 8px;
+    padding: 4px 10px;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     border: 1px solid rgba(168,85,247,0.3);
 }
 
@@ -198,7 +223,6 @@ body {
 .nav-btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
-    border-color: transparent;
 }
 </style>
 </head>
@@ -219,7 +243,6 @@ body {
             <div class="card" id="notes" onclick="expand('notes')">
                 <h2>Key Notes</h2>
                 <p>Compressed insights from the discussion</p>
-
                 <div class="content">
                     <pre style="white-space: pre-wrap;">{{ key_notes }}</pre>
                 </div>
@@ -228,7 +251,6 @@ body {
             <div class="card" id="details" onclick="expand('details')">
                 <h2>Detailed Analysis</h2>
                 <p>Arguments, counterarguments, reasoning</p>
-
                 <div class="content">
                     <p>{{ detailed_points }}</p>
                 </div>
@@ -238,7 +260,7 @@ body {
                 
                 <div class="map-header">
                     <h2>Memory Map</h2>
-                    <span id="mapCounter" class="map-badge" style="display:none;">Page 1/1</span>
+                    <span id="mapCounter" class="page-badge" style="display:none;">Page 1/1</span>
                 </div>
                 
                 <p>Conceptual structure of the discussion</p>
@@ -251,13 +273,20 @@ body {
                         <button class="nav-btn" id="btnNext" onclick="changeMap(1)">Next →</button>
                     </div>
 
-                    <div class="graph-box" id="graph"></div>
+                    <div class="graph-box">
+                        <div id="mapContextDisplay" class="context-badge">
+                            <span class="context-label">Generated From:</span>
+                            <span id="mapContextText">Original Discussion</span>
+                        </div>
+                        
+                        <div id="graph" style="width:100%; height:100%;"></div>
+                    </div>
 
                     <div class="refine-box">
                         <textarea
                             id="refineInput"
                             rows="2"
-                            placeholder="Generate a new page (e.g. 'Show me the risks involved' or 'Focus on the timeline')"
+                            placeholder="Generate a new page (e.g. 'Show me the risks involved')"
                             style="
                                 width: 100%;
                                 resize: none;
@@ -299,9 +328,9 @@ body {
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
 <script>
-// Load memory_maps (List) from backend
+// Load History [{data: {...}, context: "..."}]
 const allMaps = {{ memory_maps | tojson }} || [];
-let currentMapIndex = allMaps.length > 0 ? allMaps.length - 1 : 0; // Default to latest
+let currentMapIndex = allMaps.length > 0 ? allMaps.length - 1 : 0; 
 
 function expand(id) {
     const layout = document.getElementById("layout");
@@ -324,13 +353,17 @@ function updateMapUI() {
     const counter = document.getElementById("mapCounter");
     const btnPrev = document.getElementById("btnPrev");
     const btnNext = document.getElementById("btnNext");
+    
+    // Update Context Badge text
+    const currentEntry = allMaps[currentMapIndex];
+    if (currentEntry && currentEntry.context) {
+        document.getElementById("mapContextText").innerText = currentEntry.context;
+    }
 
-    // Only show nav if we have multiple maps
     if (allMaps.length > 1) {
         nav.style.display = "flex";
         counter.style.display = "inline-block";
         counter.innerText = `Page ${currentMapIndex + 1}/${allMaps.length}`;
-        
         btnPrev.disabled = (currentMapIndex === 0);
         btnNext.disabled = (currentMapIndex === allMaps.length - 1);
     } else {
@@ -347,9 +380,7 @@ function changeMap(direction) {
         renderGraph();
     }
 }
-</script>
 
-<script>
 async function regenerateMap() {
     const input = document.getElementById("refineInput");
     const btn = document.getElementById("regenBtn");
@@ -364,32 +395,29 @@ async function regenerateMap() {
     try {
         const formData = new FormData();
         formData.append("refinement_context", input.value);
-
         const response = await fetch("/result", {
             method: "POST",
             body: formData
         });
-
         if (response.ok) {
             window.location.reload(); 
         } else {
-            alert("Failed to generate. Check console.");
+            alert("Failed. Check console.");
             btn.disabled = false;
         }
     } catch (e) {
         console.error(e);
-        alert("Server error.");
         btn.disabled = false;
     }
 }
-</script>
 
-<script>
 function renderGraph() {
-    const graphData = allMaps[currentMapIndex] || { nodes: [], edges: [] };
+    // Access .data because structure is {data: {...}, context: "..."}
+    const mapEntry = allMaps[currentMapIndex];
+    const graphData = mapEntry ? mapEntry.data : { nodes: [], edges: [] };
 
     const graphEl = document.getElementById("graph");
-    graphEl.innerHTML = ""; // Clear previous
+    graphEl.innerHTML = ""; 
 
     if (!graphData.nodes || graphData.nodes.length === 0) {
         graphEl.innerHTML = "<div style='display:flex; height:100%; align-items:center; justify-content:center; color:#666;'>No data available for this page.</div>";
@@ -413,14 +441,12 @@ function renderGraph() {
         outcome: "#3b82f6"
     };
 
-    // 🛡️ EDGE HANDLING (Robust)
     const validNodeIds = new Set(graphData.nodes.map(n => n.id));
     const links = [];
     
     (graphData.edges || []).forEach(e => {
         const sourceId = e.from || e.source; 
         const targetId = e.to || e.target;
-
         if (validNodeIds.has(sourceId) && validNodeIds.has(targetId)) {
             links.push({
                 source: sourceId,
@@ -436,7 +462,6 @@ function renderGraph() {
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("collision", d3.forceCollide().radius(38));
 
-    // Draw Lines
     const link = g.append("g")
         .selectAll("line")
         .data(links)
@@ -446,7 +471,6 @@ function renderGraph() {
         .attr("stroke-width", 1.8)
         .attr("stroke-dasharray", d => d.relation === "challenges" ? "6,4" : "0");
 
-    // Draw Nodes
     const node = g.append("g")
         .selectAll("circle")
         .data(graphData.nodes)
@@ -455,18 +479,11 @@ function renderGraph() {
         .attr("r", 18)
         .attr("fill", d => colorByType[d.type] || "#999")
         .call(d3.drag()
-            .on("start", (event, d) => {
-                if (!event.active) simulation.alphaTarget(0.3).restart();
-                d.fx = d.x; d.fy = d.y;
-            })
-            .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
-            .on("end", (event, d) => {
-                if (!event.active) simulation.alphaTarget(0);
-                d.fx = null; d.fy = null;
-            })
+            .on("start", (e,d) => { if(!e.active)simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+            .on("drag", (e,d) => { d.fx=e.x; d.fy=e.y; })
+            .on("end", (e,d) => { if(!e.active)simulation.alphaTarget(0); d.fx=null; d.fy=null; })
         );
 
-    // Draw Labels (with truncation fix)
     const label = g.append("g")
         .selectAll("text")
         .data(graphData.nodes)
@@ -477,24 +494,17 @@ function renderGraph() {
         .attr("text-anchor", "middle")
         .attr("dy", 32)
         .text(d => d.label.length > 15 ? d.label.substring(0, 15) + "..." : d.label);
-
-    // Tooltip for full text
+    
     label.append("title").text(d => d.label);
 
     simulation.on("tick", () => {
-        link
-            .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+        link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
             .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
-        node
-            .attr("cx", d => d.x).attr("cy", d => d.y);
-        label
-            .attr("x", d => d.x).attr("y", d => d.y);
+        node.attr("cx", d => d.x).attr("cy", d => d.y);
+        label.attr("x", d => d.x).attr("y", d => d.y);
     });
 
-    // Zoom
-    svg.call(d3.zoom().scaleExtent([0.1, 4]).on("zoom", (event) => {
-        g.attr("transform", event.transform);
-    }));
+    svg.call(d3.zoom().scaleExtent([0.1, 4]).on("zoom", (e) => g.attr("transform", e.transform)));
 }
 </script>
 
