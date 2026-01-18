@@ -6,16 +6,21 @@
 <title>Input – Knowledge Synthesizer</title>
 
 <style>
-/* ---------- VARIABLES & RESET ---------- */
+/* ---------- HIGH CONTRAST VARIABLES ---------- */
 :root {
-    --bg: #050814;
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --card-hover: rgba(255, 255, 255, 0.06);
+    --bg: #02040a; 
+    
+    /* Cards: Brighter surface, sharper borders */
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.15);
+    --card-highlight: rgba(255, 255, 255, 0.3); /* The "Glass Edge" */
+    --card-hover: rgba(255, 255, 255, 0.08);
+    
     --text-main: #ffffff;
-    --text-muted: #9ca3af;
-    --accent: #a855f7;
-    --accent-glow: rgba(168, 85, 247, 0.4);
+    --text-muted: #a1a1aa;
+    
+    --accent: #c084fc; 
+    --accent-glow: rgba(192, 132, 252, 0.5);
 }
 
 * {
@@ -27,6 +32,8 @@
 
 body {
     background-color: var(--bg);
+    /* Spotlight Effect */
+    background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #02040a 80%);
     color: var(--text-main);
     min-height: 100vh;
     overflow-x: hidden;
@@ -40,14 +47,14 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0; /* Behind everything */
+    z-index: 0;
     pointer-events: none;
 }
 
 /* ---------- MAIN LAYOUT ---------- */
 .page-wrapper {
     position: relative;
-    z-index: 1; /* Above particles */
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -58,13 +65,14 @@ body {
 .container {
     width: 100%;
     max-width: 850px;
-    background: rgba(13, 17, 34, 0.6); /* Glass effect base */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--card-border);
+    border-top: 1px solid var(--card-highlight); /* High contrast edge */
     border-radius: 24px;
     padding: 3rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 }
 
 /* ---------- TYPOGRAPHY ---------- */
@@ -75,10 +83,10 @@ header {
 
 h1 {
     font-size: 2.5rem;
-    font-weight: 700;
-    background: linear-gradient(to right, #fff, #c4b5fd);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    /* Neon Text Effect */
+    text-shadow: 0 0 20px rgba(192, 132, 252, 0.3);
+    color: white;
     margin-bottom: 0.75rem;
     letter-spacing: -0.02em;
 }
@@ -99,6 +107,7 @@ p.subtitle {
 .mode {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
+    border-top: 1px solid var(--card-highlight);
     border-radius: 16px;
     padding: 1.5rem;
     text-align: center;
@@ -106,24 +115,27 @@ p.subtitle {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .mode:hover {
     background: var(--card-hover);
     transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
 }
 
 .mode.active {
     border-color: var(--accent);
     background: rgba(168, 85, 247, 0.1);
-    box-shadow: 0 0 20px var(--accent-glow);
+    box-shadow: 0 0 25px var(--accent-glow), inset 0 0 10px rgba(168,85,247,0.1);
 }
 
 .mode-icon {
     font-size: 2.2rem;
     margin-bottom: 0.75rem;
     display: block;
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
 }
 
 .mode-label {
@@ -157,12 +169,13 @@ label {
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
     color: var(--text-muted);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 textarea, select, input[type="file"] {
     width: 100%;
-    background: rgba(0, 0, 0, 0.3);
+    /* Darker input background for better text contrast */
+    background: rgba(0, 0, 0, 0.6); 
     border: 1px solid var(--card-border);
     border-radius: 12px;
     color: var(--text-main);
@@ -174,7 +187,8 @@ textarea, select, input[type="file"] {
 textarea:focus, select:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 15px var(--accent-glow);
 }
 
 textarea {
@@ -189,7 +203,7 @@ input[type="file"] {
     cursor: pointer;
 }
 input[type="file"]::file-selector-button {
-    background: var(--card-bg);
+    background: rgba(255,255,255,0.1);
     color: var(--text-main);
     border: 1px solid var(--card-border);
     padding: 0.5rem 1rem;
@@ -197,9 +211,12 @@ input[type="file"]::file-selector-button {
     margin-right: 1rem;
     cursor: pointer;
     transition: 0.2s;
+    font-weight: 600;
 }
 input[type="file"]::file-selector-button:hover {
-    background: var(--card-hover);
+    background: var(--accent);
+    color: black;
+    border-color: var(--accent);
 }
 
 /* BUTTONS */
@@ -209,23 +226,25 @@ button.primary-btn {
     border-radius: 12px;
     border: none;
     background: var(--accent);
-    color: white;
+    color: black; /* Black text on neon purple = High Readability */
     font-size: 1.05rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: 0.2s;
-    box-shadow: 0 4px 15px var(--accent-glow);
+    box-shadow: 0 0 20px var(--accent-glow);
 }
 
 button.primary-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px var(--accent-glow);
+    box-shadow: 0 0 30px var(--accent-glow);
+    opacity: 0.95;
 }
 
 button.primary-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 /* MIC SPECIFIC */
@@ -244,7 +263,7 @@ button.primary-btn:disabled {
     margin: 1.5rem 0;
     padding: 1rem;
     border-radius: 12px;
-    background: rgba(255,255,255,0.03);
+    background: rgba(0,0,0,0.4);
     border: 1px dashed var(--card-border);
     color: var(--text-muted);
 }
@@ -254,6 +273,7 @@ button.primary-btn:disabled {
     .container {
         padding: 1.5rem;
         margin-top: 1rem;
+        border-radius: 20px;
     }
 
     h1 {
@@ -366,7 +386,7 @@ button.primary-btn:disabled {
 
                 <div class="mic-controls">
                     <button id="startMic" class="primary-btn" style="background: #22c55e;">Start Recording</button>
-                    <button id="stopMic" class="primary-btn" style="background: #ef4444;" disabled>Stop</button>
+                    <button id="stopMic" class="primary-btn" style="background: #ef4444; color: white; text-shadow:none;" disabled>Stop</button>
                 </div>
             </div>
 
