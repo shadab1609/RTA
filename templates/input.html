@@ -6,55 +6,64 @@
 <title>Input – Knowledge Synthesizer</title>
 
 <style>
-/* ---------- HIGH CONTRAST VARIABLES ---------- */
+/* ---------- DESIGN TOKENS (MATCHING HOME) ---------- */
 :root {
-    --bg: #02040a; 
+    --bg: #030508;
+    --panel-bg: rgba(20, 20, 25, 0.75);
+    --border: rgba(255, 255, 255, 0.12);
+    --border-highlight: rgba(255, 255, 255, 0.3);
     
-    /* Cards: Brighter surface, sharper borders */
-    --card-bg: rgba(255, 255, 255, 0.05);
-    --card-border: rgba(255, 255, 255, 0.15);
-    --card-highlight: rgba(255, 255, 255, 0.3); /* The "Glass Edge" */
-    --card-hover: rgba(255, 255, 255, 0.08);
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --text-mono: "SF Mono", "Fira Code", "Roboto Mono", monospace;
     
-    --text-main: #ffffff;
-    --text-muted: #a1a1aa;
+    --accent: #a855f7;
+    --accent-dim: rgba(168, 85, 247, 0.15);
     
-    --accent: #c084fc; 
-    --accent-glow: rgba(192, 132, 252, 0.5);
+    --grid-color: rgba(255, 255, 255, 0.03);
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
 }
 
 body {
     background-color: var(--bg);
-    /* Spotlight Effect */
-    background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #02040a 80%);
-    color: var(--text-main);
+    color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
 }
 
-/* ---------- PARTICLES CONTAINER ---------- */
-#particles-js {
+/* TECHNICAL GRID BACKGROUND */
+.grid-bg {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
     z-index: 0;
     pointer-events: none;
+    mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+}
+
+#particles-js {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.5;
 }
 
 /* ---------- MAIN LAYOUT ---------- */
 .page-wrapper {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -62,104 +71,131 @@ body {
     padding: 2rem 1.5rem;
 }
 
+/* SYSTEM PANEL CONTAINER */
 .container {
     width: 100%;
-    max-width: 850px;
-    background: var(--card-bg);
+    max-width: 900px;
+    background: var(--panel-bg);
     backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--card-border);
-    border-top: 1px solid var(--card-highlight); /* High contrast edge */
-    border-radius: 24px;
+    border: 1px solid var(--border);
+    /* Tech Corner Accents */
+    position: relative;
     padding: 3rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.container::before {
+    content: "";
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 20px; height: 20px;
+    border-top: 2px solid var(--text-primary);
+    border-left: 2px solid var(--text-primary);
+}
+.container::after {
+    content: "";
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 20px; height: 20px;
+    border-bottom: 2px solid var(--text-primary);
+    border-right: 2px solid var(--text-primary);
 }
 
 /* ---------- TYPOGRAPHY ---------- */
 header {
     text-align: center;
     margin-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2rem;
 }
 
 h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    /* Neon Text Effect */
-    text-shadow: 0 0 20px rgba(192, 132, 252, 0.3);
-    color: white;
-    margin-bottom: 0.75rem;
-    letter-spacing: -0.02em;
+    font-family: var(--text-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: -1px;
+    text-transform: uppercase;
 }
 
 p.subtitle {
-    color: var(--text-muted);
-    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-family: var(--text-mono);
 }
 
-/* ---------- MODE SELECTOR (CARDS) ---------- */
+/* ---------- MODE SELECTOR (TECHNICAL TOGGLES) ---------- */
 .modes {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 1rem;
     margin-bottom: 2.5rem;
 }
 
 .mode {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-top: 1px solid var(--card-highlight);
-    border-radius: 16px;
-    padding: 1.5rem;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    padding: 1.2rem;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s;
     position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .mode:hover {
-    background: var(--card-hover);
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    border-color: var(--text-secondary);
+    background: rgba(255,255,255,0.03);
 }
 
 .mode.active {
     border-color: var(--accent);
-    background: rgba(168, 85, 247, 0.1);
-    box-shadow: 0 0 25px var(--accent-glow), inset 0 0 10px rgba(168,85,247,0.1);
+    background: var(--accent-dim);
+    box-shadow: inset 0 0 15px rgba(168,85,247,0.1);
+}
+
+.mode.active::before {
+    content: "ACTIVE";
+    position: absolute;
+    top: 5px; right: 5px;
+    font-size: 0.6rem;
+    font-family: var(--text-mono);
+    color: var(--accent);
 }
 
 .mode-icon {
-    font-size: 2.2rem;
-    margin-bottom: 0.75rem;
-    display: block;
-    filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    filter: grayscale(100%);
+    transition: 0.2s;
 }
+.mode.active .mode-icon { filter: grayscale(0%); }
 
 .mode-label {
-    font-weight: 600;
-    font-size: 1rem;
-    color: var(--text-main);
+    font-family: var(--text-mono);
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* ---------- INPUT SECTIONS ---------- */
 .section {
     display: none;
-    animation: fadeIn 0.4s ease-out;
+    animation: fadeIn 0.3s ease-out;
 }
-
-.section.active {
-    display: block;
-}
+.section.active { display: block; }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* FORM ELEMENTS */
+/* FORM ELEMENTS (TERMINAL STYLE) */
 .input-group {
     margin-bottom: 1.5rem;
 }
@@ -167,77 +203,82 @@ p.subtitle {
 label {
     display: block;
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-family: var(--text-mono);
+    color: var(--text-secondary);
+    text-transform: uppercase;
 }
 
 textarea, select, input[type="file"] {
     width: 100%;
-    /* Darker input background for better text contrast */
-    background: rgba(0, 0, 0, 0.6); 
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    color: var(--text-main);
+    background: #000;
+    border: 1px solid var(--border);
+    color: var(--text-mono);
     padding: 1rem;
-    font-size: 1rem;
+    font-family: var(--text-mono);
+    font-size: 0.95rem;
     transition: 0.2s;
+    border-radius: 0; /* Sharp edges */
 }
 
 textarea:focus, select:focus {
     outline: none;
     border-color: var(--accent);
-    background: rgba(0, 0, 0, 0.8);
-    box-shadow: 0 0 15px var(--accent-glow);
+    box-shadow: 0 0 0 1px var(--accent);
 }
 
 textarea {
-    height: 200px;
+    height: 250px;
     resize: none;
     line-height: 1.6;
 }
 
-/* Custom File Input Styling */
+/* Custom File Input */
 input[type="file"] {
-    padding: 0.75rem;
+    padding: 0.8rem;
     cursor: pointer;
 }
 input[type="file"]::file-selector-button {
-    background: rgba(255,255,255,0.1);
-    color: var(--text-main);
-    border: 1px solid var(--card-border);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+    background: var(--border);
+    color: var(--text-primary);
+    border: none;
+    padding: 0.4rem 1rem;
     margin-right: 1rem;
     cursor: pointer;
-    transition: 0.2s;
-    font-weight: 600;
+    font-family: var(--text-mono);
+    font-size: 0.8rem;
 }
 input[type="file"]::file-selector-button:hover {
-    background: var(--accent);
+    background: var(--text-secondary);
     color: black;
-    border-color: var(--accent);
 }
 
-/* BUTTONS */
+/* BUTTONS (PRECISION STYLE) */
 button.primary-btn {
     width: 100%;
-    padding: 1rem;
-    border-radius: 12px;
+    padding: 1.1rem;
     border: none;
-    background: var(--accent);
-    color: black; /* Black text on neon purple = High Readability */
-    font-size: 1.05rem;
+    background: var(--text-primary);
+    color: #000;
+    font-family: var(--text-mono);
+    font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
     transition: 0.2s;
-    box-shadow: 0 0 20px var(--accent-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+button.primary-btn::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 2px;
+    background: var(--accent);
 }
 
 button.primary-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 30px var(--accent-glow);
-    opacity: 0.95;
+    box-shadow: 0 5px 20px rgba(255,255,255,0.2);
 }
 
 button.primary-btn:disabled {
@@ -261,74 +302,59 @@ button.primary-btn:disabled {
 .mic-status {
     text-align: center;
     margin: 1.5rem 0;
-    padding: 1rem;
-    border-radius: 12px;
-    background: rgba(0,0,0,0.4);
-    border: 1px dashed var(--card-border);
-    color: var(--text-muted);
+    padding: 1.5rem;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: var(--text-mono);
+    font-size: 0.9rem;
 }
 
 /* ---------- MOBILE RESPONSIVENESS ---------- */
 @media (max-width: 768px) {
     .container {
         padding: 1.5rem;
-        margin-top: 1rem;
-        border-radius: 20px;
     }
-
-    h1 {
-        font-size: 2rem;
-    }
-
-    /* Stack modes vertically on mobile */
     .modes {
         grid-template-columns: 1fr; 
-        gap: 1rem;
+        gap: 0.5rem;
     }
-
     .mode {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        flex-direction: row;
+        justify-content: flex-start;
         gap: 1rem;
         padding: 1rem;
     }
-
-    .mode-icon {
-        margin-bottom: 0;
-        font-size: 1.5rem;
-    }
-
-    .mic-controls {
-        flex-direction: column;
-    }
+    .mode-icon { margin-bottom: 0; font-size: 1.4rem; }
+    .mic-controls { flex-direction: column; }
 }
 </style>
 </head>
 
 <body>
 
+    <div class="grid-bg"></div>
     <div id="particles-js"></div>
 
     <div class="page-wrapper">
         <div class="container">
             <header>
-                <h1>Knowledge Input</h1>
-                <p class="subtitle">Choose your preferred method to begin</p>
+                <h1>// SYSTEM_INPUT</h1>
+                <p class="subtitle">SELECT_DATA_SOURCE</p>
             </header>
 
             <div class="modes">
                 <div class="mode active" onclick="selectMode('text', this)">
                     <span class="mode-icon">📝</span>
-                    <span class="mode-label">Text Paste</span>
+                    <span class="mode-label">RAW_TEXT</span>
                 </div>
                 <div class="mode" onclick="selectMode('file', this)">
                     <span class="mode-icon">📁</span>
-                    <span class="mode-label">Audio File</span>
+                    <span class="mode-label">AUDIO_FILE</span>
                 </div>
                 <div class="mode" onclick="selectMode('mic', this)">
                     <span class="mode-icon">🎤</span>
-                    <span class="mode-label">Live Mic</span>
+                    <span class="mode-label">LIVE_FEED</span>
                 </div>
             </div>
 
@@ -337,27 +363,27 @@ button.primary-btn:disabled {
                     <div class="input-group">
                         <textarea 
                             name="discussion_text"
-                            placeholder="Paste your classroom discussion, meeting notes, or transcript here..."
+                            placeholder="> Paste transcript or discussion data here..."
                             required
                         ></textarea>
                     </div>
-                    <button type="submit" class="primary-btn">Analyze Text</button>
+                    <button type="submit" class="primary-btn">EXECUTE ANALYSIS</button>
                 </form>
             </div>
 
             <div class="section" id="file-section">
                 <form method="POST" action="/process-audio" enctype="multipart/form-data">
                     <div class="input-group">
-                        <label>Spoken Language</label>
+                        <label>TARGET_LANGUAGE</label>
                         <select name="language" required>
-                            <option value="en-IN">English (India)</option>
-                            <option value="hi-IN">Hindi</option>
-                            <option value="or-IN">Odia</option>
+                            <option value="en-IN">ENGLISH (INDIA)</option>
+                            <option value="hi-IN">HINDI</option>
+                            <option value="or-IN">ODIA</option>
                         </select>
                     </div>
 
                     <div class="input-group">
-                        <label>Upload Recording</label>
+                        <label>SOURCE_FILE</label>
                         <input 
                             type="file"
                             name="audio_file"
@@ -366,27 +392,27 @@ button.primary-btn:disabled {
                         >
                     </div>
                     
-                    <button type="submit" class="primary-btn">Transcribe & Analyze</button>
+                    <button type="submit" class="primary-btn">INITIATE TRANSCRIPTION</button>
                 </form>
             </div>
 
             <div class="section" id="mic-section">
                 <div class="input-group">
-                    <label>Spoken Language</label>
+                    <label>TARGET_LANGUAGE</label>
                     <select id="micLanguage">
-                        <option value="en-IN">English (India)</option>
-                        <option value="hi-IN">Hindi</option>
-                        <option value="or-IN">Odia</option>
+                        <option value="en-IN">ENGLISH (INDIA)</option>
+                        <option value="hi-IN">HINDI</option>
+                        <option value="or-IN">ODIA</option>
                     </select>
                 </div>
 
                 <div class="mic-status" id="micStatus">
-                    Ready to record. Click 'Start' below.
+                    > STATUS: STANDBY. AWAITING INPUT.
                 </div>
 
                 <div class="mic-controls">
-                    <button id="startMic" class="primary-btn" style="background: #22c55e;">Start Recording</button>
-                    <button id="stopMic" class="primary-btn" style="background: #ef4444; color: white; text-shadow:none;" disabled>Stop</button>
+                    <button id="startMic" class="primary-btn" style="background: var(--text-primary); color:black;">REC_START</button>
+                    <button id="stopMic" class="primary-btn" style="background: transparent; color: #ef4444; border: 1px solid #ef4444;" disabled>REC_STOP</button>
                 </div>
             </div>
 
@@ -400,18 +426,13 @@ button.primary-btn:disabled {
         window.onload = function () {
             particlesJS("particles-js", {
                 particles: {
-                    number: { value: 160, density: { enable: true, value_area: 800 } },
-                    color: { value: "#a855f7" },
+                    number: { value: 100, density: { enable: true, value_area: 800 } },
+                    color: { value: "#ffffff" },
                     shape: { type: "circle" },
-                    opacity: { value: 0.5, random: true },
-                    size: { value: 3, random: true },
-                    line_linked: { enable: true, distance: 150, color: "#a855f7", opacity: 0.2, width: 1 },
-                    move: { enable: true, speed: 1, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
-                },
-                interactivity: {
-                    detect_on: "canvas",
-                    events: { onhover: { enable: true, mode: "bubble" }, onclick: { enable: true, mode: "push" }, resize: true },
-                    modes: { bubble: { distance: 200, size: 6, duration: 2, opacity: 0.8, speed: 3 }, push: { particles_nb: 4 } }
+                    opacity: { value: 0.3, random: true },
+                    size: { value: 2, random: true },
+                    line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.1, width: 1 },
+                    move: { enable: true, speed: 0.5 }
                 },
                 retina_detect: true
             });
@@ -442,7 +463,7 @@ button.primary-btn:disabled {
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
 
                 mediaRecorder.onstop = async () => {
-                    statusText.innerText = "Processing audio... please wait.";
+                    statusText.innerText = "> STATUS: PROCESSING AUDIO BUFFER...";
                     
                     // Create blob and convert to base64
                     const blob = new Blob(audioChunks, { type: "audio/webm" });
@@ -462,12 +483,12 @@ button.primary-btn:disabled {
                             if (response.ok) {
                                 window.location.href = "/result";
                             } else {
-                                statusText.innerText = "Error processing audio. Please try again.";
+                                statusText.innerText = "> ERROR: PROCESSING FAILED. RETRY.";
                                 startBtn.disabled = false;
                             }
                         } catch (err) {
                             console.error(err);
-                            statusText.innerText = "Server connection failed.";
+                            statusText.innerText = "> ERROR: SERVER CONNECTION LOST.";
                             startBtn.disabled = false;
                         }
                     };
@@ -475,7 +496,7 @@ button.primary-btn:disabled {
                 };
 
                 mediaRecorder.start();
-                statusText.innerText = "🔴 Recording... Speak now.";
+                statusText.innerText = "> STATUS: RECORDING [ON_AIR]...";
                 statusText.style.color = "#a855f7";
                 statusText.style.borderColor = "#a855f7";
                 startBtn.disabled = true;
@@ -483,15 +504,15 @@ button.primary-btn:disabled {
 
             } catch (err) {
                 console.error(err);
-                statusText.innerText = "Microphone access denied.";
+                statusText.innerText = "> ERROR: MIC ACCESS DENIED.";
             }
         };
 
         stopBtn.onclick = () => {
             if (mediaRecorder && mediaRecorder.state !== "inactive") {
                 mediaRecorder.stop();
-                statusText.style.color = "var(--text-muted)";
-                statusText.style.borderColor = "var(--card-border)";
+                statusText.style.color = "var(--text-secondary)";
+                statusText.style.borderColor = "var(--border)";
                 stopBtn.disabled = true;
             }
         };
