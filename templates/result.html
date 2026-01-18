@@ -97,6 +97,8 @@ body {
     cursor: pointer;
     backdrop-filter: blur(16px);
     transition: 0.35s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .card:hover {
@@ -118,6 +120,7 @@ body {
     display: none;
     margin-top: 2rem;
     line-height: 1.7;
+    flex: 1; /* Allows content to fill space */
 }
 
 /* ---------- EXPANDED MODE ---------- */
@@ -131,7 +134,7 @@ body {
 }
 
 .container.expanded .card.active {
-    display: block;
+    display: flex;
     height: 100%;
     cursor: default;
     box-shadow: 0 0 40px var(--accent-soft);
@@ -143,11 +146,59 @@ body {
 
 /* ---------- GRAPH ---------- */
 .graph-box {
-    height: 70vh;
+    height: 65vh;
     width: 100%;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     border-radius: 18px;
     border: 1px dashed var(--border);
+    background: rgba(0,0,0,0.2);
+    overflow: hidden; /* Important for D3 zoom */
+}
+
+/* ---------- CONTROLS ---------- */
+.map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.map-badge {
+    background: rgba(168,85,247,0.2);
+    color: #d8b4fe;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(168,85,247,0.3);
+}
+
+.nav-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.nav-btn {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.nav-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--accent);
+}
+
+.nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: transparent;
 }
 </style>
 </head>
@@ -156,18 +207,15 @@ body {
 
 <div class="container" id="layout">
 
-    <!-- SIDE BAR -->
     <div class="sidebar" id="sidebar">
         <div class="side-tab" onclick="expand('notes')">Key Notes</div>
         <div class="side-tab" onclick="expand('details')">Detailed</div>
         <div class="side-tab" onclick="expand('map')">Memory Map</div>
     </div>
 
-    <!-- MAIN -->
     <div class="main">
         <div class="cards">
 
-            <!-- KEY NOTES -->
             <div class="card" id="notes" onclick="expand('notes')">
                 <h2>Key Notes</h2>
                 <p>Compressed insights from the discussion</p>
@@ -177,7 +225,6 @@ body {
                 </div>
             </div>
 
-            <!-- DETAILED -->
             <div class="card" id="details" onclick="expand('details')">
                 <h2>Detailed Analysis</h2>
                 <p>Arguments, counterarguments, reasoning</p>
@@ -187,55 +234,60 @@ body {
                 </div>
             </div>
 
-            <!-- MEMORY MAP -->
             <div class="card" id="map" onclick="expand('map')">
+                
+                <div class="map-header">
                     <h2>Memory Map</h2>
-                    <p>Conceptual structure of the discussion</p>
-                
-                    <div class="content" onclick="event.stopPropagation()">
-                        
-                        <div class="graph-box" id="graph"></div>
-                
-                        <div class="refine-box">
-                            <textarea
-                                id="refineInput"
-                                rows="2"
-                                placeholder="Refine the map (e.g. add more detail, focus on decisions)"
-                                style="
-                                    width: 100%;
-                                    resize: none;
-                                    margin-top: 1rem;
-                                    padding: 0.75rem;
-                                    border-radius: 10px;
-                                    background: rgba(255,255,255,0.05);
-                                    border: 1px solid rgba(255,255,255,0.15);
-                                    color: white;
-                                "
-                            ></textarea>
-                        
-                            <button
-                                id="regenBtn"
-                                onclick="regenerateMap()" 
-                                style="
-                                    margin-top: 0.75rem;
-                                    padding: 0.6rem 1.5rem;
-                                    border-radius: 999px;
-                                    border: none;
-                                    background: #a855f7;
-                                    color: white;
-                                    cursor: pointer;
-                                    transition: 0.2s;
-                                "
-                            >
-                                Regenerate Map
-                            </button>
-                            <span id="loadingMsg" style="display:none; color:#a855f7; margin-left:10px;">Synthesizing...</span>
-                        </div>
-                
-                    </div>
+                    <span id="mapCounter" class="map-badge" style="display:none;">Page 1/1</span>
                 </div>
+                
+                <p>Conceptual structure of the discussion</p>
+
+                <div class="content" onclick="event.stopPropagation()">
                     
+                    <div id="mapNav" class="nav-controls" style="display:none;">
+                        <button class="nav-btn" id="btnPrev" onclick="changeMap(-1)">← Previous</button>
+                        <span style="color:var(--muted); font-size:0.85rem;">History</span>
+                        <button class="nav-btn" id="btnNext" onclick="changeMap(1)">Next →</button>
+                    </div>
+
+                    <div class="graph-box" id="graph"></div>
+
+                    <div class="refine-box">
+                        <textarea
+                            id="refineInput"
+                            rows="2"
+                            placeholder="Generate a new page (e.g. 'Show me the risks involved' or 'Focus on the timeline')"
+                            style="
+                                width: 100%;
+                                resize: none;
+                                margin-top: 1rem;
+                                padding: 0.75rem;
+                                border-radius: 10px;
+                                background: rgba(255,255,255,0.05);
+                                border: 1px solid rgba(255,255,255,0.15);
+                                color: white;
+                            "
+                        ></textarea>
                     
+                        <button
+                            id="regenBtn"
+                            onclick="regenerateMap()" 
+                            style="
+                                margin-top: 0.75rem;
+                                padding: 0.6rem 1.5rem;
+                                border-radius: 999px;
+                                border: none;
+                                background: #a855f7;
+                                color: white;
+                                cursor: pointer;
+                                transition: 0.2s;
+                            "
+                        >
+                            Generate New Page (+1)
+                        </button>
+                        <span id="loadingMsg" style="display:none; color:#a855f7; margin-left:10px;">Synthesizing Page...</span>
+                    </div>
 
                 </div>
             </div>
@@ -244,29 +296,59 @@ body {
     </div>
 </div>
 
-<!-- D3 -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
 <script>
+// Load memory_maps (List) from backend
+const allMaps = {{ memory_maps | tojson }} || [];
+let currentMapIndex = allMaps.length > 0 ? allMaps.length - 1 : 0; // Default to latest
+
 function expand(id) {
     const layout = document.getElementById("layout");
     const sidebar = document.getElementById("sidebar");
 
     document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
-
-    const activeCard = document.getElementById(id);
-    activeCard.classList.add("active");
+    document.getElementById(id).classList.add("active");
 
     layout.classList.add("expanded");
     sidebar.classList.add("active");
 
     if (id === "map") {
-        window.graphRendered = false;
+        updateMapUI();
         setTimeout(renderGraph, 100);
     }
+}
 
+function updateMapUI() {
+    const nav = document.getElementById("mapNav");
+    const counter = document.getElementById("mapCounter");
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+
+    // Only show nav if we have multiple maps
+    if (allMaps.length > 1) {
+        nav.style.display = "flex";
+        counter.style.display = "inline-block";
+        counter.innerText = `Page ${currentMapIndex + 1}/${allMaps.length}`;
+        
+        btnPrev.disabled = (currentMapIndex === 0);
+        btnNext.disabled = (currentMapIndex === allMaps.length - 1);
+    } else {
+        nav.style.display = "none";
+        counter.style.display = "none";
+    }
+}
+
+function changeMap(direction) {
+    const newIndex = currentMapIndex + direction;
+    if (newIndex >= 0 && newIndex < allMaps.length) {
+        currentMapIndex = newIndex;
+        updateMapUI();
+        renderGraph();
+    }
 }
 </script>
+
 <script>
 async function regenerateMap() {
     const input = document.getElementById("refineInput");
@@ -275,7 +357,6 @@ async function regenerateMap() {
     
     if (!input.value.trim()) return;
 
-    // UI Loading State
     btn.disabled = true;
     btn.style.opacity = "0.5";
     msg.style.display = "inline";
@@ -284,41 +365,40 @@ async function regenerateMap() {
         const formData = new FormData();
         formData.append("refinement_context", input.value);
 
-        // Send to backend without reloading page
         const response = await fetch("/result", {
             method: "POST",
             body: formData
         });
 
         if (response.ok) {
-            // Reload page smoothly to fetch new session data
             window.location.reload(); 
         } else {
-            alert("Failed to regenerate. Check console.");
+            alert("Failed to generate. Check console.");
             btn.disabled = false;
         }
     } catch (e) {
         console.error(e);
-        alert("Error connecting to server.");
+        alert("Server error.");
         btn.disabled = false;
     }
 }
 </script>
+
 <script>
 function renderGraph() {
-    const graphData = {{ memory_map | tojson }} || { nodes: [], edges: [] };
+    const graphData = allMaps[currentMapIndex] || { nodes: [], edges: [] };
+
+    const graphEl = document.getElementById("graph");
+    graphEl.innerHTML = ""; // Clear previous
+
     if (!graphData.nodes || graphData.nodes.length === 0) {
-        console.warn("⚠️ No graph data available");
+        graphEl.innerHTML = "<div style='display:flex; height:100%; align-items:center; justify-content:center; color:#666;'>No data available for this page.</div>";
         return;
     }
 
-    const graphEl = document.getElementById("graph");
     const width = graphEl.clientWidth || 900;
     const height = graphEl.clientHeight || 600;
 
-    // Clear previous graph
-    graphEl.innerHTML = ""; 
-    
     const svg = d3.select("#graph")
         .append("svg")
         .attr("width", width)
@@ -333,40 +413,30 @@ function renderGraph() {
         outcome: "#3b82f6"
     };
 
-    // 🛡️ SECURITY FIX: Robust Edge Handling (Fixes "undefined" errors)
-    // 1. Create a Set of all valid Node IDs
+    // 🛡️ EDGE HANDLING (Robust)
     const validNodeIds = new Set(graphData.nodes.map(n => n.id));
-
-    // 2. Normalize and Filter Edges
     const links = [];
     
-    graphData.edges.forEach(e => {
-        // AI sometimes uses "source"/"target" instead of "from"/"to"
+    (graphData.edges || []).forEach(e => {
         const sourceId = e.from || e.source; 
         const targetId = e.to || e.target;
 
-        // Check if both ends exist
         if (validNodeIds.has(sourceId) && validNodeIds.has(targetId)) {
             links.push({
                 source: sourceId,
                 target: targetId,
                 relation: e.relation
             });
-        } else {
-            // Only log if it's actually broken, not just a key mismatch
-            if (sourceId && targetId) {
-                 console.warn(`🗑️ Removed broken edge: ${sourceId} -> ${targetId}`);
-            }
         }
     });
 
-
     const simulation = d3.forceSimulation(graphData.nodes)
         .force("link", d3.forceLink(links).id(d => d.id).distance(150))
-        .force("charge", d3.forceManyBody().strength(-420))
+        .force("charge", d3.forceManyBody().strength(-400))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("collision", d3.forceCollide().radius(38));
 
+    // Draw Lines
     const link = g.append("g")
         .selectAll("line")
         .data(links)
@@ -374,10 +444,9 @@ function renderGraph() {
         .append("line")
         .attr("stroke", "#9ca3af")
         .attr("stroke-width", 1.8)
-        .attr("stroke-dasharray", d =>
-            d.relation === "challenges" ? "6,4" : "0"
-        );
+        .attr("stroke-dasharray", d => d.relation === "challenges" ? "6,4" : "0");
 
+    // Draw Nodes
     const node = g.append("g")
         .selectAll("circle")
         .data(graphData.nodes)
@@ -386,106 +455,56 @@ function renderGraph() {
         .attr("r", 18)
         .attr("fill", d => colorByType[d.type] || "#999")
         .call(d3.drag()
-            .on("start", dragStarted)
-            .on("drag", dragged)
-            .on("end", dragEnded)
+            .on("start", (event, d) => {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x; d.fy = d.y;
+            })
+            .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
+            .on("end", (event, d) => {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null; d.fy = null;
+            })
         );
 
-const label = g.append("g")
+    // Draw Labels (with truncation fix)
+    const label = g.append("g")
         .selectAll("text")
         .data(graphData.nodes)
         .enter()
         .append("text")
-        .attr("font-size", "11px")       // Set styles on the TEXT
+        .attr("font-size", "11px")
         .attr("fill", "#e5e7eb")
         .attr("text-anchor", "middle")
         .attr("dy", 32)
         .text(d => d.label.length > 15 ? d.label.substring(0, 15) + "..." : d.label);
 
-    // Append the tooltip separately so it doesn't mess up the 'label' variable
-    label.append("title")
-        .text(d => d.label);
+    // Tooltip for full text
+    label.append("title").text(d => d.label);
 
     simulation.on("tick", () => {
         link
-            .attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
-
+            .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
         node
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y);
-
+            .attr("cx", d => d.x).attr("cy", d => d.y);
         label
-            .attr("x", d => d.x)
-            .attr("y", d => d.y);
+            .attr("x", d => d.x).attr("y", d => d.y);
     });
 
-    // When simulation ends, auto-fit the graph
-    simulation.on("end", () => {
-        const xs = graphData.nodes.map(d => d.x);
-        const ys = graphData.nodes.map(d => d.y);
-
-        const minX = Math.min(...xs);
-        const maxX = Math.max(...xs);
-        const minY = Math.min(...ys);
-        const maxY = Math.max(...ys);
-
-        const graphWidth = maxX - minX;
-        const graphHeight = maxY - minY;
-
-        console.log("📊 Graph bounds:", {
-            minX, maxX, minY, maxY,
-            graphWidth, graphHeight
-        });
-
-        const padding = 80;
-
-        svg.attr(
-            "viewBox",
-            `${minX - padding} ${minY - padding} ${graphWidth + padding * 2} ${graphHeight + padding * 2}`
-        );
-    });
-
-    // Zoom + pan (safe defaults)
-    svg.call(
-        d3.zoom()
-            .scaleExtent([0.5, 2.5])
-            .on("zoom", (event) => {
-                g.attr("transform", event.transform);
-            })
-    );
-
-    function dragStarted(event, d) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-    }
-
-    function dragged(event, d) {
-        d.fx = event.x;
-        d.fy = event.y;
-    }
-
-    function dragEnded(event, d) {
-        if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }
+    // Zoom
+    svg.call(d3.zoom().scaleExtent([0.1, 4]).on("zoom", (event) => {
+        g.attr("transform", event.transform);
+    }));
 }
 </script>
 
 <script>
 {% if open_map %}
 window.addEventListener("load", () => {
-    setTimeout(() => {
-        expand("map");
-    }, 150);
+    setTimeout(() => { expand("map"); }, 150);
 });
 {% endif %}
 </script>
-
 
 </body>
 </html>
