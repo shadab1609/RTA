@@ -462,23 +462,24 @@ def process_text():
             return redirect(url_for("input_page"))
         
         session["source_text"] = input_text
+        
+        # 1. Generate AI outputs
         key_notes = generate_key_notes(input_text)
         detailed_points = generate_detailed_points(input_text)
-        memory_map = generate_memory_map(input_text)
+        initial_map = generate_memory_map(input_text)
         
+        # 2. Store Map as a LIST (History support)
+        session["memory_maps"] = [initial_map]  # <--- CHANGED: List initialization
         session["key_notes"] = key_notes
         session["detailed_points"] = detailed_points
-        session["memory_map"] = memory_map
 
-        print("✅ AI outputs stored in session")
+        print("✅ AI outputs stored in session (Page 1)")
         return redirect(url_for("result_page"))
 
     except Exception as e:
         print("❌ Error in /process-text")
         traceback.print_exc()
         return "Internal error during processing", 500
-
-
 @app.route("/process-audio", methods=["POST"])
 def process_audio():
     try:
@@ -612,40 +613,41 @@ def process_mic():
 @app.route("/result", methods=["GET", "POST"])
 def result_page():
     try:
-        open_map = False  # 👈 default
+        # Get the list of maps (default to empty list)
+        maps_history = session.get("memory_maps", [])
+        open_map = False
 
         if request.method == "POST":
             refinement = request.form.get("refinement_context", "").strip()
             source_text = session.get("source_text", "")
 
             if refinement and source_text:
-                print("🔁 Regenerating memory map")
-                print("🧩 Refinement:", refinement)
-
-                refined_map = regenerate_memory_map(
-                    source_text,
-                    refinement
-                )
-
-                session["memory_map"] = refined_map
+                print(f"🔁 Generating Map Page {len(maps_history) + 1}")
+                
+                # Generate NEW map based on refinement
+                new_map = regenerate_memory_map(source_text, refinement)
+                
+                # Append to history instead of overwriting
+                maps_history.append(new_map)
+                session["memory_maps"] = maps_history 
                 session["last_refinement"] = refinement
-                open_map = True  # 👈 force-open map after regen
+                
+                # Force session save (crucial for filesystem sessions)
+                session.modified = True 
+                open_map = True
 
         return render_template(
             "result.html",
             key_notes=session.get("key_notes", ""),
             detailed_points=session.get("detailed_points", ""),
-            memory_map=session.get("memory_map", {}),
-            open_map=open_map  # 👈 pass flag to UI
+            memory_maps=maps_history,  # <--- PASS THE LIST
+            open_map=open_map
         )
 
     except Exception:
         print("❌ Error loading / regenerating result")
         traceback.print_exc()
         return "Result page error", 500
-
-
-
 
 
 
