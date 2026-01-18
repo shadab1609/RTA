@@ -2,19 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Results – Knowledge Synthesizer</title>
 
 <style>
+/* ---------- VARIABLES & RESET ---------- */
 :root {
     --bg: #050814;
-    --glass: rgba(255,255,255,0.06);
-    --border: rgba(255,255,255,0.14);
-    --text: #e5e7eb;
-    --muted: #9ca3af;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --text-main: #ffffff;
+    --text-muted: #9ca3af;
     --accent: #a855f7;
-    --accent-soft: rgba(168,85,247,0.25);
-    --chat-bg: rgba(13, 17, 34, 0.6);
+    --accent-glow: rgba(168, 85, 247, 0.4);
+    --nav-height: 80px; /* Approx 1/8th of mobile screen */
 }
 
 * {
@@ -25,56 +26,71 @@
 }
 
 body {
-    background: radial-gradient(circle at top, #0b1024, #050814);
-    color: var(--text);
+    background-color: var(--bg);
+    color: var(--text-main);
     height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
-/* ---------- LAYOUT ---------- */
-.container {
+/* ---------- PARTICLES ---------- */
+#particles-js {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ---------- LAYOUT STRUCTURE ---------- */
+.page-wrapper {
+    position: relative;
+    z-index: 1;
     display: flex;
     height: 100vh;
     padding: 2rem;
     gap: 1.5rem;
 }
 
-/* ---------- SIDE BAR ---------- */
+/* ---------- SIDEBAR (DESKTOP) / NAVBAR (MOBILE) ---------- */
 .sidebar {
     width: 70px;
-    display: none;
+    display: flex;
     flex-direction: column;
     gap: 1rem;
-}
-
-.sidebar.active {
-    display: flex;
+    z-index: 100;
 }
 
 .side-tab {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    background: var(--glass);
-    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
     border-radius: 14px;
-    padding: 1rem 0.6rem;
+    padding: 1.5rem 0.6rem;
     cursor: pointer;
-    color: var(--muted);
+    color: var(--text-muted);
     text-align: center;
-    transition: 0.25s;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
-.side-tab:hover {
-    color: var(--text);
+.side-tab:hover, .side-tab.active {
+    color: var(--text-main);
     border-color: var(--accent);
+    background: rgba(168,85,247,0.1);
+    box-shadow: 0 0 15px var(--accent-glow);
 }
 
-/* ---------- MAIN ---------- */
+/* ---------- MAIN CONTENT ---------- */
 .main {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .cards {
@@ -82,530 +98,617 @@ body {
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1200px;
+    height: 100%;
+    align-content: center;
 }
 
-/* ---------- CARD ---------- */
+/* ---------- CARD STYLES ---------- */
 .card {
-    background: linear-gradient(
-        180deg,
-        rgba(255,255,255,0.08),
-        rgba(255,255,255,0.02)
-    );
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    padding: 2.5rem;
+    background: rgba(13, 17, 34, 0.6);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 2rem;
     cursor: pointer;
-    backdrop-filter: blur(16px);
-    transition: 0.35s ease;
+    backdrop-filter: blur(12px);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
     flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    height: 600px; /* Fixed height for desktop elegance */
 }
 
 .card:hover {
     transform: translateY(-8px);
-    border-color: var(--accent);
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.card h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.card p {
-    color: var(--muted);
-}
-
-/* ---------- CONTENT ---------- */
-.content {
-    display: none;
-    margin-top: 1.5rem;
-    line-height: 1.7;
-    flex: 1;
-    overflow: hidden; /* Prevent spillover */
-}
-
-/* ---------- EXPANDED MODE ---------- */
-.container.expanded .cards {
+/* Expanded State (Desktop) */
+.page-wrapper.expanded .cards {
     grid-template-columns: 1fr;
-    max-width: none;
+    height: 100%;
 }
 
-.container.expanded .card {
+.page-wrapper.expanded .card {
     display: none;
 }
 
-.container.expanded .card.active {
+.page-wrapper.expanded .card.active {
     display: flex;
     height: 100%;
     cursor: default;
-    box-shadow: 0 0 40px var(--accent-soft);
+    transform: none;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    border-color: var(--accent);
 }
 
-.card.active .content {
-    display: flex;
-    flex-direction: column;
-}
-
-/* ---------- GRAPH UI ---------- */
-.graph-box {
-    flex: 1; /* Takes available height */
-    min-height: 400px;
-    width: 100%;
-    border-radius: 18px;
-    border: 1px dashed var(--border);
-    background: rgba(0,0,0,0.2);
-    overflow: hidden;
-    position: relative;
+.card-header {
     margin-bottom: 1rem;
-}
-
-.context-badge {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    background: rgba(0,0,0,0.6);
-    padding: 5px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    font-size: 0.85rem;
-    color: #e5e7eb;
-    max-width: 80%;
-    z-index: 10;
-    backdrop-filter: blur(4px);
-}
-
-.map-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.page-badge {
-    background: rgba(168,85,247,0.2);
-    color: #d8b4fe;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    border: 1px solid rgba(168,85,247,0.3);
+.card h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.2rem;
+    background: linear-gradient(to right, #fff, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.nav-controls {
+.card p {
+    color: var(--text-muted);
+}
+
+.content {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+    padding-right: 5px;
+}
+
+.card.active .content {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- CONTENT STYLES ---------- */
+pre {
+    white-space: pre-wrap;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    color: #e2e8f0;
+}
+
+/* ---------- MEMORY MAP UI ---------- */
+.map-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     gap: 1rem;
-    margin-bottom: 1rem;
+}
+
+.graph-wrapper {
+    flex: 1;
+    border-radius: 16px;
+    border: 1px dashed var(--card-border);
+    background: rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+    min-height: 350px;
+}
+
+.fullscreen-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid var(--card-border);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: 0.2s;
+    font-size: 1.2rem;
+}
+
+/* Map Nav Buttons (Page 1/2 etc) */
+.map-nav {
+    display: flex; 
+    gap: 10px; 
     align-items: center;
 }
 
-.nav-btn {
-    background: var(--glass);
-    border: 1px solid var(--border);
-    color: white;
-    padding: 6px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: 0.2s;
-}
-
-.nav-btn:hover {
+.nav-arrow {
     background: rgba(255,255,255,0.1);
-    border-color: var(--accent);
+    border: 1px solid var(--card-border);
+    color: white;
+    width: 30px; 
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
 }
+.nav-arrow:disabled { opacity: 0.3; cursor: default; }
 
-/* ---------- SPLIT CONTROL DECK (NEW) ---------- */
-.control-deck {
+/* Desktop Controls (Chat/Regen) */
+.desktop-controls {
     display: flex;
     gap: 1.5rem;
-    height: 220px; /* Fixed height for consistency */
-    margin-top: auto;
+    height: 250px;
 }
 
-/* Left: Regenerate Panel */
-.regen-panel {
+.panel {
     flex: 1;
-    background: var(--glass);
-    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--card-border);
     border-radius: 16px;
     padding: 1rem;
     display: flex;
     flex-direction: column;
 }
 
-/* Right: Chat Panel */
-.chat-panel {
+/* Chat Styles */
+.chat-window {
     flex: 1;
-    background: var(--chat-bg);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.chat-messages {
-    flex: 1;
-    padding: 1rem;
     overflow-y: auto;
+    margin-bottom: 0.8rem;
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
+}
+
+.msg {
+    padding: 8px 12px;
+    border-radius: 12px;
     font-size: 0.9rem;
+    line-height: 1.4;
+    max-width: 90%;
 }
+.msg.ai { background: rgba(255,255,255,0.05); border-top-left-radius: 2px; align-self: flex-start; }
+.msg.user { background: rgba(168,85,247,0.25); border-bottom-right-radius: 2px; align-self: flex-end; }
 
-.chat-input-area {
-    padding: 0.8rem;
-    background: rgba(0,0,0,0.2);
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Form Elements */
-textarea, input[type="text"] {
+input, textarea {
     background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
+    border: 1px solid var(--card-border);
     color: white;
-    border-radius: 8px;
     padding: 0.8rem;
-    resize: none;
+    border-radius: 10px;
     outline: none;
+    width: 100%;
 }
+input:focus, textarea:focus { border-color: var(--accent); }
 
-textarea:focus, input[type="text"]:focus {
-    border-color: var(--accent);
-}
-
-.btn-primary {
+.btn {
     background: var(--accent);
     color: white;
     border: none;
-    border-radius: 8px;
-    padding: 0 1.2rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 10px;
     cursor: pointer;
-    font-weight: 500;
-    transition: 0.2s;
+    font-weight: 600;
 }
 
-.btn-primary:hover {
-    opacity: 0.9;
-}
+/* ---------- MOBILE RESPONSIVE (6/8 - 1/8 - 1/8) ---------- */
+@media (max-width: 768px) {
+    body { height: 100vh; overflow: hidden; } 
+    .page-wrapper { padding: 0; display: block; }
+    
+    /* 1. NAVBAR (1/8th Fixed Bottom) */
+    .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: var(--nav-height);
+        flex-direction: row;
+        justify-content: space-around;
+        background: rgba(5, 8, 20, 0.95);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid var(--card-border);
+        padding: 0;
+        z-index: 1000;
+    }
 
-.msg-ai {
-    background: rgba(255,255,255,0.05);
-    padding: 10px;
-    border-radius: 10px 10px 10px 0;
-    align-self: flex-start;
-    max-width: 90%;
-    line-height: 1.4;
-}
+    .side-tab {
+        writing-mode: horizontal-tb;
+        transform: none;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 5px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        gap: 4px;
+    }
+    .side-tab.active { background: linear-gradient(to bottom, rgba(168,85,247,0.1), transparent); border-top: 2px solid var(--accent); }
+    .tab-icon { font-size: 1.5rem; display: block; }
 
-.msg-user {
-    background: rgba(168,85,247,0.2);
-    padding: 10px;
-    border-radius: 10px 10px 0 10px;
-    align-self: flex-end;
-    max-width: 90%;
+    /* 2. MAIN CONTAINER */
+    .main {
+        height: calc(100vh - var(--nav-height)); /* 7/8th of screen */
+        padding: 0;
+        align-items: flex-start;
+        overflow: hidden;
+    }
+
+    .cards { display: block; height: 100%; }
+    
+    /* Active Card Mobile */
+    .card.active {
+        height: 100%;
+        border-radius: 0;
+        border: none;
+        background: transparent;
+        padding: 0;
+    }
+
+    /* Text Sections Scrollable */
+    #notes.active, #details.active {
+        overflow-y: auto;
+        padding: 1.5rem;
+    }
+
+    /* 3. MAP LAYOUT (The 6+1 Split) */
+    #map.active .content {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #map.active .map-container {
+        height: 100%;
+        gap: 0;
+    }
+
+    /* MAP (Flex 6 = approx 6/8th) */
+    .graph-wrapper {
+        flex: 6; 
+        border-radius: 0 0 20px 20px;
+        border-bottom: 1px solid var(--card-border);
+    }
+    
+    /* Fullscreen Override (8/8th) */
+    .graph-wrapper.fullscreen {
+        flex: 1; /* Take all space */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - var(--nav-height));
+        z-index: 500;
+        background: var(--bg);
+    }
+
+    /* CONTROLS (Flex 1 = approx 1/8th) */
+    .desktop-controls {
+        flex: 1; 
+        height: auto; /* Let flex handle size */
+        flex-direction: row; /* Keep chat/regen side by side or swappable */
+        background: #050814;
+        padding: 0.5rem;
+        gap: 0.5rem;
+        overflow-y: auto;
+    }
+
+    /* Panels in Mobile Drawer */
+    .panel {
+        background: rgba(255,255,255,0.03);
+        border: none;
+        padding: 0.5rem;
+        border-radius: 12px;
+        min-width: 0; /* Flex fix */
+    }
+    
+    /* Optimize Chat for Small Height */
+    .chat-window {
+        height: 60px; /* Small scrollable area */
+        font-size: 0.8rem;
+    }
+    
+    #map.active .card-header { display: none; } /* Save space */
 }
 </style>
 </head>
 
 <body>
+    <div id="particles-js"></div>
 
-<div class="container" id="layout">
-
-    <div class="sidebar" id="sidebar">
-        <div class="side-tab" onclick="expand('notes')">Key Notes</div>
-        <div class="side-tab" onclick="expand('details')">Detailed</div>
-        <div class="side-tab" onclick="expand('map')">Memory Map</div>
-    </div>
-
-    <div class="main">
-        <div class="cards">
-
-            <div class="card" id="notes" onclick="expand('notes')">
-                <h2>Key Notes</h2>
-                <p>Compressed insights from the discussion</p>
-                <div class="content">
-                    <pre style="white-space: pre-wrap;">{{ key_notes }}</pre>
-                </div>
+    <div class="page-wrapper" id="layout">
+        
+        <div class="sidebar" id="sidebar">
+            <div class="side-tab" onclick="expand('notes')">
+                <span class="tab-icon">📝</span>
+                <span>Notes</span>
             </div>
-
-            <div class="card" id="details" onclick="expand('details')">
-                <h2>Detailed Analysis</h2>
-                <p>Arguments, counterarguments, reasoning</p>
-                <div class="content">
-                    <p>{{ detailed_points }}</p>
-                </div>
+            <div class="side-tab" onclick="expand('details')">
+                <span class="tab-icon">📘</span>
+                <span>Details</span>
             </div>
+            <div class="side-tab" onclick="expand('map')">
+                <span class="tab-icon">🧠</span>
+                <span>Map</span>
+            </div>
+        </div>
 
-            <div class="card" id="map" onclick="expand('map')">
-                
-                <div class="map-header">
-                    <h2>Memory Map</h2>
-                    <span id="mapCounter" class="page-badge" style="display:none;">Page 1/1</span>
+        <div class="main">
+            <div class="cards">
+
+                <div class="card" id="notes" onclick="expand('notes')">
+                    <div class="card-header">
+                        <h2>Key Notes</h2>
+                    </div>
+                    <div class="content">
+                        <pre>{{ key_notes }}</pre>
+                    </div>
                 </div>
-                
-                <p>Conceptual structure of the discussion</p>
 
-                <div class="content" onclick="event.stopPropagation()">
-                    
-                    <div id="mapNav" class="nav-controls" style="display:none;">
-                        <button class="nav-btn" id="btnPrev" onclick="changeMap(-1)">← Previous</button>
-                        <span style="color:var(--muted); font-size:0.85rem;">History</span>
-                        <button class="nav-btn" id="btnNext" onclick="changeMap(1)">Next →</button>
+                <div class="card" id="details" onclick="expand('details')">
+                    <div class="card-header">
+                        <h2>Detailed Analysis</h2>
                     </div>
-
-                    <div class="graph-box">
-                        <div id="mapContextDisplay" class="context-badge">
-                            <span style="color:var(--muted); font-size:0.7rem; text-transform:uppercase;">Generated From:</span><br>
-                            <span id="mapContextText">Original Discussion</span>
-                        </div>
-                        <div id="graph" style="width:100%; height:100%;"></div>
+                    <div class="content">
+                        <p>{{ detailed_points }}</p>
                     </div>
+                </div>
 
-                    <div class="control-deck">
+                <div class="card" id="map" onclick="expand('map')">
+                    <div class="card-header">
+                        <h2>Memory Map</h2>
                         
-                        <div class="regen-panel">
-                            <span style="color:var(--accent); font-size:0.85rem; margin-bottom:0.5rem; font-weight:600;">Create New Page</span>
-                            <textarea 
-                                id="refineInput" 
-                                style="flex:1; margin-bottom:0.8rem;" 
-                                placeholder="E.g. 'Show me the risks involved' or 'Focus on the timeline'"></textarea>
-                            
-                            <div style="display:flex; align-items:center; justify-content:space-between;">
-                                <button id="regenBtn" class="btn-primary" onclick="regenerateMap()" style="padding: 0.8rem 1.5rem; width:100%;">
-                                    Generate (+1)
-                                </button>
-                                <span id="loadingMsg" style="display:none; color:#a855f7; font-size:0.8rem; margin-left:10px;">Synthesizing...</span>
-                            </div>
+                        <div class="map-nav" id="mapNav" style="display:none;" onclick="event.stopPropagation()">
+                            <button class="nav-arrow" id="btnPrev" onclick="changeMap(-1)">←</button>
+                            <span id="mapCounter" style="font-size:0.9rem; color:#d8b4fe;">Page 1/1</span>
+                            <button class="nav-arrow" id="btnNext" onclick="changeMap(1)">→</button>
                         </div>
+                    </div>
 
-                        <div class="chat-panel">
-                            <div class="chat-messages" id="chatMessages">
-                                <div class="msg-ai">
-                                    Hi! I'm analyzing the current map. Ask me about connections, colors, or specific nodes.
+                    <div class="content" onclick="event.stopPropagation()">
+                        <div class="map-container">
+                            
+                            <div class="graph-wrapper" id="graphContainer">
+                                <div class="fullscreen-btn" onclick="toggleFullscreen()">⛶</div>
+                                <div id="graph" style="width:100%; height:100%;"></div>
+                                
+                                <div style="position:absolute; top:15px; left:15px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:6px; font-size:0.75rem; pointer-events:none;">
+                                    <span id="mapContextText" style="color:#d8b4fe;">Original Discussion</span>
                                 </div>
                             </div>
-                            
-                            <div class="chat-input-area">
-                                <input type="text" id="chatInput" style="flex:1;" placeholder="Ask about this map..." onkeypress="if(event.key === 'Enter') sendChat()">
-                                <button class="btn-primary" onclick="sendChat()">➤</button>
+
+                            <div class="desktop-controls" id="mobileControls">
+                                
+                                <div class="panel" style="flex:1.5;">
+                                    <div class="chat-window" id="chatMessages">
+                                        <div class="msg ai">Ask me about the map!</div>
+                                    </div>
+                                    <div style="display:flex; gap:0.5rem;">
+                                        <input type="text" id="chatInput" placeholder="Message..." onkeypress="if(event.key === 'Enter') sendChat()">
+                                        <button class="btn" onclick="sendChat()">➤</button>
+                                    </div>
+                                </div>
+
+                                <div class="panel" style="flex:1; justify-content:center;">
+                                    <textarea id="refineInput" rows="1" placeholder="New topic..." style="resize:none; height:40px; margin-bottom:0.5rem;"></textarea>
+                                    <button class="btn" id="regenBtn" onclick="regenerateMap()" style="width:100%;">New Page</button>
+                                </div>
+
                             </div>
                         </div>
-
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
-</div>
 
-<script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/static/js/particles.min.js"></script>
 
-<script>
-const allMaps = {{ memory_maps | tojson }} || [];
-let currentMapIndex = allMaps.length > 0 ? allMaps.length - 1 : 0; 
+    <script>
+        // PARTICLES
+        window.onload = function () {
+            particlesJS("particles-js", {
+                particles: {
+                    number: { value: 80, density: { enable: true, value_area: 800 } },
+                    color: { value: "#a855f7" },
+                    opacity: { value: 0.5 },
+                    size: { value: 3 },
+                    line_linked: { enable: true, color: "#a855f7", opacity: 0.2 },
+                    move: { enable: true, speed: 1 }
+                }
+            });
+            {% if open_map %} setTimeout(() => expand('map'), 150); {% endif %}
+        };
 
-function expand(id) {
-    const layout = document.getElementById("layout");
-    const sidebar = document.getElementById("sidebar");
-
-    document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
-
-    layout.classList.add("expanded");
-    sidebar.classList.add("active");
-
-    if (id === "map") {
-        updateMapUI();
-        setTimeout(renderGraph, 100);
-    }
-}
-
-function updateMapUI() {
-    const nav = document.getElementById("mapNav");
-    const counter = document.getElementById("mapCounter");
-    const btnPrev = document.getElementById("btnPrev");
-    const btnNext = document.getElementById("btnNext");
-    
-    // Update Context Badge
-    const currentEntry = allMaps[currentMapIndex];
-    if (currentEntry && currentEntry.context) {
-        // Truncate if too long
-        let txt = currentEntry.context;
-        if(txt.length > 60) txt = txt.substring(0, 60) + "...";
-        document.getElementById("mapContextText").innerText = txt;
-    }
-
-    if (allMaps.length > 1) {
-        nav.style.display = "flex";
-        counter.style.display = "inline-block";
-        counter.innerText = `Page ${currentMapIndex + 1}/${allMaps.length}`;
-        btnPrev.disabled = (currentMapIndex === 0);
-        btnNext.disabled = (currentMapIndex === allMaps.length - 1);
-    } else {
-        nav.style.display = "none";
-        counter.style.display = "none";
-    }
-}
-
-function changeMap(direction) {
-    const newIndex = currentMapIndex + direction;
-    if (newIndex >= 0 && newIndex < allMaps.length) {
-        currentMapIndex = newIndex;
-        updateMapUI();
-        renderGraph();
-    }
-}
-</script>
-
-<script>
-async function regenerateMap() {
-    const input = document.getElementById("refineInput");
-    const btn = document.getElementById("regenBtn");
-    const msg = document.getElementById("loadingMsg");
-    
-    if (!input.value.trim()) return;
-
-    btn.disabled = true;
-    btn.style.opacity = "0.5";
-    btn.innerText = "Processing...";
-    msg.style.display = "inline";
-
-    try {
-        const formData = new FormData();
-        formData.append("refinement_context", input.value);
-        const response = await fetch("/result", { method: "POST", body: formData });
-        
-        if (response.ok) {
-            window.location.reload(); 
-        } else {
-            alert("Failed. Check console.");
-            btn.disabled = false;
+        // FULLSCREEN
+        function toggleFullscreen() {
+            const wrapper = document.getElementById('graphContainer');
+            const controls = document.getElementById('mobileControls');
+            const btn = document.querySelector('.fullscreen-btn');
+            
+            wrapper.classList.toggle('fullscreen');
+            
+            if(wrapper.classList.contains('fullscreen')) {
+                if(window.innerWidth <= 768) controls.style.display = 'none';
+                btn.innerText = "✖";
+                btn.style.background = "#ef4444";
+            } else {
+                controls.style.display = 'flex';
+                btn.innerText = "⛶";
+                btn.style.background = "";
+            }
+            setTimeout(renderGraph, 100);
         }
-    } catch (e) {
-        console.error(e);
-        btn.disabled = false;
-    }
-}
-</script>
 
-<script>
-async function sendChat() {
-    const input = document.getElementById("chatInput");
-    const msgs = document.getElementById("chatMessages");
-    const text = input.value.trim();
+        // MAP STATE & NAV
+        const allMaps = {{ memory_maps | tojson }} || [];
+        let currentMapIndex = allMaps.length > 0 ? allMaps.length - 1 : 0; 
 
-    if (!text) return;
+        function expand(id) {
+            const layout = document.getElementById("layout");
+            const tabs = document.querySelectorAll(".side-tab");
+            
+            document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
+            tabs.forEach(t => t.classList.remove("active"));
+            
+            document.getElementById(id).classList.add("active");
+            layout.classList.add("expanded");
+            
+            // Highlight Tab
+            const map = {'notes':0, 'details':1, 'map':2};
+            if(tabs[map[id]]) tabs[map[id]].classList.add("active");
 
-    // 1. User Message
-    msgs.innerHTML += `<div class="msg-user">${text}</div>`;
-    input.value = "";
-    msgs.scrollTop = msgs.scrollHeight;
-
-    // 2. Loading
-    const loadingId = "loading-" + Date.now();
-    msgs.innerHTML += `<div id="${loadingId}" style="opacity:0.6; font-size:0.8rem; margin:5px;">Thinking...</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-
-    try {
-        // 3. Get Context
-        const currentEntry = allMaps[currentMapIndex];
-        const mapData = currentEntry ? currentEntry.data : {};
-
-        // 4. API Call
-        const response = await fetch("/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                message: text,
-                current_map: mapData
-            })
-        });
-
-        const data = await response.json();
-
-        // 5. Response
-        document.getElementById(loadingId).remove();
-        msgs.innerHTML += `<div class="msg-ai">${data.reply}</div>`;
-        msgs.scrollTop = msgs.scrollHeight;
-
-    } catch (e) {
-        console.error(e);
-        document.getElementById(loadingId).innerText = "Connection error.";
-    }
-}
-</script>
-
-<script>
-function renderGraph() {
-    const mapEntry = allMaps[currentMapIndex];
-    const graphData = mapEntry ? mapEntry.data : { nodes: [], edges: [] };
-    const graphEl = document.getElementById("graph");
-    
-    graphEl.innerHTML = ""; 
-    const width = graphEl.clientWidth || 900;
-    const height = graphEl.clientHeight || 500;
-
-    if (!graphData.nodes || graphData.nodes.length === 0) {
-        graphEl.innerHTML = "<div style='display:flex;height:100%;align-items:center;justify-content:center;color:#666;'>No data available.</div>";
-        return;
-    }
-
-    const svg = d3.select("#graph").append("svg").attr("width", width).attr("height", height);
-    const g = svg.append("g");
-    const colorByType = { concept: "#a855f7", argument: "#22c55e", concern: "#ef4444", outcome: "#3b82f6" };
-
-    const validNodeIds = new Set(graphData.nodes.map(n => n.id));
-    const links = [];
-    (graphData.edges || []).forEach(e => {
-        const sourceId = e.from || e.source; 
-        const targetId = e.to || e.target;
-        if (validNodeIds.has(sourceId) && validNodeIds.has(targetId)) {
-            links.push({ source: sourceId, target: targetId, relation: e.relation });
+            if (id === "map") {
+                updateMapUI();
+                setTimeout(renderGraph, 200);
+            }
         }
-    });
 
-    const simulation = d3.forceSimulation(graphData.nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(140))
-        .force("charge", d3.forceManyBody().strength(-350))
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collision", d3.forceCollide().radius(35));
+        function updateMapUI() {
+            const nav = document.getElementById("mapNav");
+            const counter = document.getElementById("mapCounter");
+            const entry = allMaps[currentMapIndex];
+            
+            // Update Context Label
+            if(entry && entry.context) {
+                let txt = entry.context;
+                if(txt.length > 25) txt = txt.substring(0, 25) + "...";
+                document.getElementById("mapContextText").innerText = txt;
+            }
 
-    const link = g.append("g").selectAll("line").data(links).enter().append("line")
-        .attr("stroke", "#9ca3af").attr("stroke-width", 1.8)
-        .attr("stroke-dasharray", d => d.relation === "challenges" ? "6,4" : "0");
+            // Update Nav Controls
+            if (allMaps.length > 1) {
+                nav.style.display = "flex";
+                counter.innerText = `Page ${currentMapIndex + 1}/${allMaps.length}`;
+                document.getElementById("btnPrev").disabled = (currentMapIndex === 0);
+                document.getElementById("btnNext").disabled = (currentMapIndex === allMaps.length - 1);
+            } else {
+                nav.style.display = "none";
+            }
+        }
 
-    const node = g.append("g").selectAll("circle").data(graphData.nodes).enter().append("circle")
-        .attr("r", 18).attr("fill", d => colorByType[d.type] || "#999")
-        .call(d3.drag().on("start", (e,d) => {if(!e.active)simulation.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y})
-        .on("drag", (e,d) => {d.fx=e.x;d.fy=e.y})
-        .on("end", (e,d) => {if(!e.active)simulation.alphaTarget(0);d.fx=null;d.fy=null}));
+        function changeMap(dir) {
+            const newIndex = currentMapIndex + dir;
+            if (newIndex >= 0 && newIndex < allMaps.length) {
+                currentMapIndex = newIndex;
+                updateMapUI();
+                renderGraph();
+            }
+        }
 
-    const label = g.append("g").selectAll("text").data(graphData.nodes).enter().append("text")
-        .attr("font-size", "11px").attr("fill", "#e5e7eb").attr("text-anchor", "middle").attr("dy", 32)
-        .text(d => d.label.length > 15 ? d.label.substring(0, 15) + "..." : d.label);
-    
-    label.append("title").text(d => d.label);
+        // BACKEND CALLS
+        async function sendChat() {
+            const input = document.getElementById("chatInput");
+            const msgs = document.getElementById("chatMessages");
+            const text = input.value.trim();
+            if(!text) return;
+            
+            msgs.innerHTML += `<div class="msg user">${text}</div>`;
+            input.value = "";
+            msgs.scrollTop = msgs.scrollHeight;
 
-    simulation.on("tick", () => {
-        link.attr("x1", d => d.source.x).attr("y1", d => d.source.y).attr("x2", d => d.target.x).attr("y2", d => d.target.y);
-        node.attr("cx", d => d.x).attr("cy", d => d.y);
-        label.attr("x", d => d.x).attr("y", d => d.y);
-    });
+            try {
+                const entry = allMaps[currentMapIndex];
+                const mapData = entry ? entry.data : {};
+                const res = await fetch("/chat", {
+                    method: "POST", headers: {"Content-Type":"application/json"},
+                    body: JSON.stringify({message:text, current_map:mapData})
+                });
+                const data = await res.json();
+                msgs.innerHTML += `<div class="msg ai">${data.reply}</div>`;
+                msgs.scrollTop = msgs.scrollHeight;
+            } catch(e){ console.error(e); }
+        }
 
-    svg.call(d3.zoom().scaleExtent([0.1, 4]).on("zoom", (e) => g.attr("transform", e.transform)));
-}
-</script>
+        async function regenerateMap() {
+            const input = document.getElementById("refineInput");
+            const btn = document.getElementById("regenBtn");
+            if(!input.value.trim()) return;
+            btn.innerText = "..."; btn.disabled = true;
+            try {
+                const fd = new FormData(); fd.append("refinement_context", input.value);
+                const res = await fetch("/result", {method:"POST", body:fd});
+                if(res.ok) window.location.reload();
+            } catch(e){ console.error(e); btn.disabled=false; }
+        }
 
-<script>
-{% if open_map %}
-window.addEventListener("load", () => { setTimeout(() => { expand("map"); }, 150); });
-{% endif %}
-</script>
+        // D3 GRAPH
+        function renderGraph() {
+            const entry = allMaps[currentMapIndex];
+            const data = entry ? entry.data : {nodes:[], edges:[]};
+            const el = document.getElementById("graph");
+            el.innerHTML = "";
+            
+            if(!data.nodes || data.nodes.length === 0) {
+                el.innerHTML = "<div style='display:flex;height:100%;align-items:center;justify-content:center;color:#666;'>No Data</div>";
+                return;
+            }
 
+            const w = el.clientWidth, h = el.clientHeight;
+            const svg = d3.select("#graph").append("svg").attr("width", w).attr("height", h);
+            const g = svg.append("g");
+            
+            const color = {concept:"#a855f7", argument:"#22c55e", concern:"#ef4444", outcome:"#3b82f6"};
+            const ids = new Set(data.nodes.map(n=>n.id));
+            const links = [];
+            (data.edges||[]).forEach(e => {
+                const s = e.from||e.source, t = e.to||e.target;
+                if(ids.has(s) && ids.has(t)) links.push({source:s, target:t, relation:e.relation});
+            });
+
+            const sim = d3.forceSimulation(data.nodes)
+                .force("link", d3.forceLink(links).id(d=>d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-200))
+                .force("center", d3.forceCenter(w/2, h/2))
+                .force("collide", d3.forceCollide().radius(25));
+
+            const link = g.append("g").selectAll("line").data(links).enter().append("line")
+                .attr("stroke", "#9ca3af").attr("stroke-width", 1.5)
+                .attr("stroke-dasharray", d=>d.relation==="challenges"?"4,4":"0");
+
+            const node = g.append("g").selectAll("circle").data(data.nodes).enter().append("circle")
+                .attr("r", 15).attr("fill", d=>color[d.type]||"#999")
+                .call(d3.drag().on("start", (e,d)=>{if(!e.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y})
+                .on("drag", (e,d)=>{d.fx=e.x;d.fy=e.y})
+                .on("end", (e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
+
+            const label = g.append("g").selectAll("text").data(data.nodes).enter().append("text")
+                .attr("font-size", "10px").attr("fill", "#e5e7eb").attr("text-anchor", "middle").attr("dy", 25)
+                .text(d=>d.label.length>12?d.label.substring(0,12)+"...":d.label);
+            
+            label.append("title").text(d=>d.label);
+
+            sim.on("tick", () => {
+                link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+                node.attr("cx",d=>d.x).attr("cy",d=>d.y);
+                label.attr("x",d=>d.x).attr("y",d=>d.y);
+            });
+            
+            svg.call(d3.zoom().scaleExtent([0.1,4]).on("zoom", e=>g.attr("transform", e.transform)));
+        }
+    </script>
 </body>
 </html>
