@@ -391,18 +391,20 @@ function renderGraph() {
             .on("end", dragEnded)
         );
 
-    const label = g.append("g")
+const label = g.append("g")
         .selectAll("text")
         .data(graphData.nodes)
         .enter()
         .append("text")
-        .text(d => d.label.length > 15 ? d.label.substring(0, 15) + "..." : d.label)
-        .append("title")
-        .text(d => d.label);
-        .attr("font-size", "11px")
+        .attr("font-size", "11px")       // Set styles on the TEXT
         .attr("fill", "#e5e7eb")
         .attr("text-anchor", "middle")
-        .attr("dy", 32);
+        .attr("dy", 32)
+        .text(d => d.label.length > 15 ? d.label.substring(0, 15) + "..." : d.label);
+
+    // Append the tooltip separately so it doesn't mess up the 'label' variable
+    label.append("title")
+        .text(d => d.label);
 
     simulation.on("tick", () => {
         link
