@@ -179,6 +179,12 @@ def generate_key_notes(text):
     prompt = f"""
 You are an AI assistant that extracts key notes from classroom discussions.
 
+NOISE FILTERING RULES (CRITICAL):
+- IGNORE conversational filler (e.g., "Good morning", "Can you hear me?").
+- IGNORE disciplinary interruptions (e.g., "Quiet down", shouting, scolding).
+- IGNORE administrative chatter (e.g., "Turn to page 10", "Attendance").
+- FOCUS ONLY on the educational concepts, arguments, and facts discussed.
+
 Instructions:
 - Extract 5 to 8 concise key points.
 - Each point must be short and factual.
@@ -197,6 +203,11 @@ def generate_detailed_points(text):
     print("📘 Generating detailed discussion...")
     prompt = f"""
 You are an AI assistant that explains discussions in detail.
+
+NOISE FILTERING RULES (CRITICAL):
+- Strictly IGNORE social greetings, classroom discipline, or interruptions.
+- If the teacher shouts or scolds, treat it as noise and discard it.
+- Extract only the core subject matter.
 
 Instructions:
 - Analyze the discussion text below.
@@ -219,6 +230,11 @@ def generate_memory_map(text):
     print("🧠 Generating memory map...")
     prompt = f"""
 You are an AI assistant that converts discussions into structured knowledge graphs.
+
+NOISE FILTERING RULES (CRITICAL):
+- Do NOT create nodes for greetings ("Hello"), discipline ("Quiet!"), or logistics.
+- Do NOT create nodes for people unless they are historical figures mentioned in the topic.
+- Map ONLY the concepts, arguments, and outcomes of the topic itself.
 
 Instructions:
 - Analyze the discussion text below.
