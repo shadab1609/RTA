@@ -292,14 +292,13 @@ footer {
         </nav>
 
         <section class="hero">
-            <span class="tagline">v1.0.0 // AI Architecture</span>
             <h1>Structure Your<br>Conversations</h1>
             <p>
                 Transform raw classroom noise into structured semantic graphs.
                 Identify arguments, isolate risks, and visualize connections.
             </p>
             <a href="/input">
-                <button class="btn-main">INITIALIZE SYSTEM</button>
+                <button class="btn-main">START PROCESS</button>
             </a>
         </section>
 
@@ -307,7 +306,7 @@ footer {
             
             <div class="step">
                 <div class="step-icon">I/O</div>
-                <h3>Ingest Data</h3>
+                <h3>Input Data</h3>
                 <p>Accepts Multi-Lingual Audio streams or raw text. Processes Hindi, Odia, and English via Azure.</p>
             </div>
 
@@ -335,12 +334,21 @@ footer {
         window.onload = function () {
             particlesJS("particles-js", {
                 particles: {
-                    number: { value: 60, density: { enable: true, value_area: 800 } },
+                    number: { 
+                        value: 160, // <--- INCREASED FROM 60
+                        density: { enable: true, value_area: 800 } 
+                    },
                     color: { value: "#ffffff" },
                     shape: { type: "circle" },
                     opacity: { value: 0.3, random: true },
                     size: { value: 2, random: true },
-                    line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.1, width: 1 },
+                    line_linked: { 
+                        enable: true, 
+                        distance: 150, // Increase this to 200 if you want lines to reach further
+                        color: "#ffffff", 
+                        opacity: 0.1, 
+                        width: 1 
+                    },
                     move: { enable: true, speed: 0.5 }
                 },
                 retina_detect: true
