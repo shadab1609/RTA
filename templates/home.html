@@ -6,24 +6,34 @@
 <title>Knowledge Synthesizer</title>
 
 <style>
+/* ---------- HIGH CONTRAST VARIABLES ---------- */
 :root {
-    --bg-primary: #070b16;
-    --text-primary: #ffffff;
-    --text-secondary: #c7c9ff;
-    --accent: #a855f7;
-    --border: rgba(255,255,255,0.1);
+    --bg: #02040a; 
+    
+    /* Cards: Brighter surface, sharper borders */
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.15);
+    --card-highlight: rgba(255, 255, 255, 0.3); /* The "Glass Edge" */
+    
+    --text-main: #ffffff;
+    --text-muted: #a1a1aa;
+    
+    --accent: #c084fc; 
+    --accent-glow: rgba(192, 132, 252, 0.5);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Segoe UI", system-ui, sans-serif;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
 body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
+    background-color: var(--bg);
+    /* Spotlight Effect */
+    background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #02040a 80%);
+    color: var(--text-main);
     overflow-x: hidden;
 }
 
@@ -32,6 +42,7 @@ body {
     position: fixed;
     inset: 0;
     z-index: 0;
+    pointer-events: none;
 }
 
 /* CONTENT LAYER */
@@ -46,85 +57,113 @@ body {
 /* HEADER */
 header {
     padding: 1.5rem 3rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--card-border);
     backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .logo {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #fff, var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: white;
+    text-shadow: 0 0 15px var(--accent-glow);
+    letter-spacing: -0.02em;
 }
 
 /* MAIN */
 main {
     flex: 1;
-    max-width: 1100px;
+    max-width: 1200px;
     margin: auto;
-    padding: 5rem 2rem;
+    padding: 6rem 2rem;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* HERO */
+.hero {
+    margin-bottom: 5rem;
+}
+
 .hero h1 {
-    font-size: 3.5rem;
+    font-size: 4rem;
     font-weight: 800;
     line-height: 1.1;
     margin-bottom: 1.5rem;
+    text-shadow: 0 0 30px rgba(192, 132, 252, 0.3);
+    background: linear-gradient(to bottom right, #fff, #e9d5ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .hero p {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-    max-width: 760px;
+    font-size: 1.3rem;
+    color: var(--text-muted);
+    max-width: 700px;
     margin: 0 auto 3rem;
+    line-height: 1.6;
 }
 
-/* CTA */
+/* CTA BUTTON */
 .btn-primary {
-    padding: 1.1rem 3.2rem;
+    padding: 1.2rem 3.5rem;
     border-radius: 999px;
     border: none;
     background: var(--accent);
-    color: #fff;
+    color: black; /* High Contrast Black on Neon */
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 15px 45px rgba(168,85,247,0.45);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 60px rgba(168,85,247,0.6);
+    box-shadow: 0 0 25px var(--accent-glow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* FEATURES */
+.btn-primary:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 0 40px var(--accent-glow);
+    background: #d8b4fe;
+}
+
+/* FEATURES GRID */
 .features {
-    margin-top: 6rem;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    width: 100%;
 }
 
 .feature {
-    padding: 2rem;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    backdrop-filter: blur(6px);
+    padding: 2.5rem;
+    border-radius: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-top: 1px solid var(--card-highlight); /* Glass Top Highlight */
+    backdrop-filter: blur(12px);
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.feature:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255,255,255,0.25);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .feature h3 {
-    font-size: 1.3rem;
-    margin-bottom: 0.8rem;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
     color: #fff;
+    font-weight: 700;
 }
 
 .feature p {
-    font-size: 1rem;
-    color: var(--text-secondary);
+    font-size: 1.05rem;
+    color: var(--text-muted);
     line-height: 1.6;
 }
 
@@ -133,14 +172,25 @@ footer {
     padding: 2rem;
     text-align: center;
     font-size: 0.9rem;
-    color: var(--text-secondary);
-    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    border-top: 1px solid var(--card-border);
+    background: rgba(0,0,0,0.2);
 }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
     .hero h1 {
-        font-size: 2.6rem;
+        font-size: 2.8rem;
+    }
+    header {
+        padding: 1.5rem;
+        justify-content: center;
+    }
+    .features {
+        grid-template-columns: 1fr;
+    }
+    main {
+        padding: 4rem 1.5rem;
     }
 }
 </style>
@@ -148,7 +198,6 @@ footer {
 
 <body>
 
-<!-- PARTICLES BACKGROUND -->
 <div id="particles-js"></div>
 
 <div class="page">
@@ -174,26 +223,26 @@ footer {
 
     <section class="features">
         <div class="feature">
-            <h3>Speech & Text Ingestion</h3>
+            <h3>🎙️ Speech & Text Ingestion</h3>
             <p>
-                Accepts live audio, recordings, or raw text transcripts
-                from real classroom environments.
+                Seamlessly accepts live audio, recordings, or raw text transcripts
+                from real classroom environments, supporting multiple languages.
             </p>
         </div>
 
         <div class="feature">
-            <h3>AI Reasoning Layer</h3>
+            <h3>🧠 AI Reasoning Layer</h3>
             <p>
-                Extracts concepts, arguments, counterpoints, and open
-                questions instead of producing flat summaries.
+                Goes beyond summarization. The AI extracts concepts, arguments, 
+                counterpoints, and open questions to model true understanding.
             </p>
         </div>
 
         <div class="feature">
-            <h3>Knowledge Maps</h3>
+            <h3>🕸️ Knowledge Maps</h3>
             <p>
-                Generates visual graphs that reveal how ideas connect,
-                support, or contradict each other.
+                Generates interactive, force-directed graphs that reveal how ideas 
+                connect, support, or contradict each other visually.
             </p>
         </div>
     </section>
@@ -206,45 +255,23 @@ footer {
 
 </div>
 
-<!-- PARTICLES JS -->
 <script src="/static/js/particles.min.js"></script>
 <script>
 window.onload = function () {
   particlesJS("particles-js", {
     particles: {
-      number: {
-        value: 280,
-        density: { enable: true, value_area: 900 }
-      },
+      number: { value: 100, density: { enable: true, value_area: 800 } },
       color: { value: "#a855f7" },
       shape: { type: "circle" },
-      opacity: {
-        value: 0.6,
-        random: true
-      },
-      size: {
-        value: 3,
-        random: true
-      },
-      line_linked: {
-        enable: true,
-        distance: 150,
-        color: "#a855f7",
-        opacity: 0.35,
-        width: 1
-      },
-      move: {
-        enable: true,
-        speed: 1.4,
-        direction: "none",
-        out_mode: "out"
-      }
+      opacity: { value: 0.5, random: true },
+      size: { value: 3, random: true },
+      line_linked: { enable: true, distance: 150, color: "#a855f7", opacity: 0.2, width: 1 },
+      move: { enable: true, speed: 1, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
     },
     interactivity: {
-      events: {
-        onhover: { enable: false },
-        onclick: { enable: false }
-      }
+      detect_on: "canvas",
+      events: { onhover: { enable: true, mode: "bubble" }, onclick: { enable: true, mode: "push" }, resize: true },
+      modes: { bubble: { distance: 200, size: 6, duration: 2, opacity: 0.8, speed: 3 }, push: { particles_nb: 4 } }
     },
     retina_detect: true
   });
