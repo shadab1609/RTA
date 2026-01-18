@@ -306,8 +306,7 @@ async function regenerateMap() {
 </script>
 <script>
 function renderGraph() {
-    const graphData = {{ memory_map | tojson }};
-
+    const graphData = {{ memory_map | tojson }} || { nodes: [], edges: [] };
     if (!graphData.nodes || graphData.nodes.length === 0) {
         console.warn("⚠️ No graph data available");
         return;
@@ -334,25 +333,33 @@ function renderGraph() {
         outcome: "#3b82f6"
     };
 
-    // 🛡️ SECURITY FIX: Filter out "Hallucinated" Edges
+    // 🛡️ SECURITY FIX: Robust Edge Handling (Fixes "undefined" errors)
     // 1. Create a Set of all valid Node IDs
     const validNodeIds = new Set(graphData.nodes.map(n => n.id));
 
-    // 2. Only keep edges where BOTH source and target exist
-    const cleanEdges = graphData.edges.filter(e => {
-        if (!validNodeIds.has(e.from) || !validNodeIds.has(e.to)) {
-            console.warn(`🗑️ Removed broken edge: ${e.from} -> ${e.to}`);
-            return false;
+    // 2. Normalize and Filter Edges
+    const links = [];
+    
+    graphData.edges.forEach(e => {
+        // AI sometimes uses "source"/"target" instead of "from"/"to"
+        const sourceId = e.from || e.source; 
+        const targetId = e.to || e.target;
+
+        // Check if both ends exist
+        if (validNodeIds.has(sourceId) && validNodeIds.has(targetId)) {
+            links.push({
+                source: sourceId,
+                target: targetId,
+                relation: e.relation
+            });
+        } else {
+            // Only log if it's actually broken, not just a key mismatch
+            if (sourceId && targetId) {
+                 console.warn(`🗑️ Removed broken edge: ${sourceId} -> ${targetId}`);
+            }
         }
-        return true;
     });
 
-    // 3. Map the CLEAN edges
-    const links = cleanEdges.map(e => ({
-        source: e.from,
-        target: e.to,
-        relation: e.relation
-    }));
 
     const simulation = d3.forceSimulation(graphData.nodes)
         .force("link", d3.forceLink(links).id(d => d.id).distance(150))
@@ -389,7 +396,9 @@ function renderGraph() {
         .data(graphData.nodes)
         .enter()
         .append("text")
-        .text(d => d.label)
+        .text(d => d.label.length > 15 ? d.label.substring(0, 15) + "..." : d.label)
+        .append("title")
+        .text(d => d.label);
         .attr("font-size", "11px")
         .attr("fill", "#e5e7eb")
         .attr("text-anchor", "middle")
