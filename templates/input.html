@@ -6,272 +6,475 @@
 <title>Input – Knowledge Synthesizer</title>
 
 <style>
+/* ---------- VARIABLES & RESET ---------- */
 :root {
-    --bg: #070b16;
-    --card: rgba(255,255,255,0.04);
-    --border: rgba(255,255,255,0.1);
-    --text: #ffffff;
-    --muted: #c7c9ff;
+    --bg: #050814;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-hover: rgba(255, 255, 255, 0.06);
+    --text-main: #ffffff;
+    --text-muted: #9ca3af;
     --accent: #a855f7;
+    --accent-glow: rgba(168, 85, 247, 0.4);
 }
 
 * {
     box-sizing: border-box;
-    font-family: "Segoe UI", system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
 body {
-    background: var(--bg);
-    color: var(--text);
+    background-color: var(--bg);
+    color: var(--text-main);
     min-height: 100vh;
-    padding: 3rem 1.5rem;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ---------- PARTICLES CONTAINER ---------- */
+#particles-js {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Behind everything */
+    pointer-events: none;
+}
+
+/* ---------- MAIN LAYOUT ---------- */
+.page-wrapper {
+    position: relative;
+    z-index: 1; /* Above particles */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
 }
 
 .container {
-    max-width: 800px;
-    margin: auto;
+    width: 100%;
+    max-width: 850px;
+    background: rgba(13, 17, 34, 0.6); /* Glass effect base */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-h1 {
-    font-size: 2.4rem;
-    margin-bottom: 0.5rem;
-}
-
-p {
-    color: var(--muted);
-    margin-bottom: 2.5rem;
-}
-
-/* MODE SELECT */
-.modes {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1.5rem;
+/* ---------- TYPOGRAPHY ---------- */
+header {
+    text-align: center;
     margin-bottom: 3rem;
 }
 
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #fff, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+}
+
+p.subtitle {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+/* ---------- MODE SELECTOR (CARDS) ---------- */
+.modes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
 .mode {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
     padding: 1.5rem;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    cursor: pointer;
     text-align: center;
-    transition: border 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.mode:hover {
+    background: var(--card-hover);
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .mode.active {
     border-color: var(--accent);
-    transform: translateY(-3px);
+    background: rgba(168, 85, 247, 0.1);
+    box-shadow: 0 0 20px var(--accent-glow);
 }
 
-.mode span {
-    font-size: 2rem;
+.mode-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.75rem;
     display: block;
-    margin-bottom: 0.6rem;
 }
 
-/* INPUT SECTIONS */
+.mode-label {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+/* ---------- INPUT SECTIONS ---------- */
 .section {
     display: none;
-    padding: 2rem;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    background: var(--card);
+    animation: fadeIn 0.4s ease-out;
 }
 
 .section.active {
     display: block;
 }
 
-/* TEXTAREA */
-textarea {
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* FORM ELEMENTS */
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+textarea, select, input[type="file"] {
     width: 100%;
-    height: 180px;
-    background: transparent;
-    border: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--card-border);
     border-radius: 12px;
-    color: var(--text);
+    color: var(--text-main);
     padding: 1rem;
+    font-size: 1rem;
+    transition: 0.2s;
+}
+
+textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+}
+
+textarea {
+    height: 200px;
     resize: none;
+    line-height: 1.6;
 }
 
-/* FILE INPUT */
-input[type="file"], select {
+/* Custom File Input Styling */
+input[type="file"] {
+    padding: 0.75rem;
+    cursor: pointer;
+}
+input[type="file"]::file-selector-button {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1px solid var(--card-border);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin-right: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+input[type="file"]::file-selector-button:hover {
+    background: var(--card-hover);
+}
+
+/* BUTTONS */
+button.primary-btn {
     width: 100%;
-    padding: 0.9rem;
-    margin-top: 1rem;
-    background: transparent;
-    color: var(--text);
+    padding: 1rem;
     border-radius: 12px;
-    border: 1px solid var(--border);
-}
-
-/* BUTTON */
-button {
-    margin-top: 1.5rem;
-    padding: 0.9rem 2.4rem;
-    border-radius: 999px;
     border: none;
     background: var(--accent);
     color: white;
-    font-size: 1rem;
+    font-size: 1.05rem;
+    font-weight: 600;
     cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 4px 15px var(--accent-glow);
 }
 
-.note {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-top: 0.8rem;
+button.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--accent-glow);
+}
+
+button.primary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* MIC SPECIFIC */
+.mic-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.mic-controls button {
+    flex: 1;
+}
+
+.mic-status {
+    text-align: center;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px dashed var(--card-border);
+    color: var(--text-muted);
+}
+
+/* ---------- MOBILE RESPONSIVENESS ---------- */
+@media (max-width: 768px) {
+    .container {
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    /* Stack modes vertically on mobile */
+    .modes {
+        grid-template-columns: 1fr; 
+        gap: 1rem;
+    }
+
+    .mode {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .mode-icon {
+        margin-bottom: 0;
+        font-size: 1.5rem;
+    }
+
+    .mic-controls {
+        flex-direction: column;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-    <h1>Provide Discussion Input</h1>
-    <p>Select how you want to input the discussion.</p>
+    <div id="particles-js"></div>
 
-    <!-- MODE SELECT -->
-    <div class="modes">
-        <div class="mode active" onclick="selectMode('text', this)">
-            <span>📝</span> Text
-        </div>
-        <div class="mode" onclick="selectMode('file', this)">
-            <span>📁</span> Audio File
-        </div>
-        <div class="mode" onclick="selectMode('mic', this)">
-            <span>🎤</span> Microphone
-        </div>
-    </div>
+    <div class="page-wrapper">
+        <div class="container">
+            <header>
+                <h1>Knowledge Input</h1>
+                <p class="subtitle">Choose your preferred method to begin</p>
+            </header>
 
-    <!-- TEXT INPUT -->
-    <div class="section active" id="text-section">
-        <form method="POST" action="/process-text">
-            <textarea 
-                name="discussion_text"
-                placeholder="Paste discussion transcript here..."
-                required
-            ></textarea>
-            <button type="submit">Analyze Discussion</button>
-        </form>
-    </div>
-
-    <!-- AUDIO FILE INPUT -->
-    <div class="section" id="file-section">
-        <form method="POST" action="/process-audio" enctype="multipart/form-data">
-
-            <label>Spoken Language</label>
-            <select name="language" required>
-                <option value="en-IN">English</option>
-                <option value="hi-IN">Hindi</option>
-                <option value="or-IN">Odia</option>
-            </select>
-
-            <input 
-                type="file"
-                name="audio_file"
-                accept="audio/*"
-                required
-            >
-
-            <div class="note">
-                Audio will be transcribed and translated to English before analysis.
+            <div class="modes">
+                <div class="mode active" onclick="selectMode('text', this)">
+                    <span class="mode-icon">📝</span>
+                    <span class="mode-label">Text Paste</span>
+                </div>
+                <div class="mode" onclick="selectMode('file', this)">
+                    <span class="mode-icon">📁</span>
+                    <span class="mode-label">Audio File</span>
+                </div>
+                <div class="mode" onclick="selectMode('mic', this)">
+                    <span class="mode-icon">🎤</span>
+                    <span class="mode-label">Live Mic</span>
+                </div>
             </div>
 
-            <button type="submit">Transcribe & Analyze</button>
-        </form>
+            <div class="section active" id="text-section">
+                <form method="POST" action="/process-text">
+                    <div class="input-group">
+                        <textarea 
+                            name="discussion_text"
+                            placeholder="Paste your classroom discussion, meeting notes, or transcript here..."
+                            required
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="primary-btn">Analyze Text</button>
+                </form>
+            </div>
+
+            <div class="section" id="file-section">
+                <form method="POST" action="/process-audio" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <label>Spoken Language</label>
+                        <select name="language" required>
+                            <option value="en-IN">English (India)</option>
+                            <option value="hi-IN">Hindi</option>
+                            <option value="or-IN">Odia</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Upload Recording</label>
+                        <input 
+                            type="file"
+                            name="audio_file"
+                            accept="audio/*"
+                            required
+                        >
+                    </div>
+                    
+                    <button type="submit" class="primary-btn">Transcribe & Analyze</button>
+                </form>
+            </div>
+
+            <div class="section" id="mic-section">
+                <div class="input-group">
+                    <label>Spoken Language</label>
+                    <select id="micLanguage">
+                        <option value="en-IN">English (India)</option>
+                        <option value="hi-IN">Hindi</option>
+                        <option value="or-IN">Odia</option>
+                    </select>
+                </div>
+
+                <div class="mic-status" id="micStatus">
+                    Ready to record. Click 'Start' below.
+                </div>
+
+                <div class="mic-controls">
+                    <button id="startMic" class="primary-btn" style="background: #22c55e;">Start Recording</button>
+                    <button id="stopMic" class="primary-btn" style="background: #ef4444;" disabled>Stop</button>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <!-- MIC INPUT (UI ONLY FOR NOW) -->
-    <div class="section" id="mic-section">
-            <label>Spoken language</label>
-            <select id="micLanguage">
-                <option value="en-IN">English</option>
-                <option value="hi-IN">Hindi</option>
-                <option value="or-IN">Odia</option>
-            </select>
-        
-            <p id="micStatus" style="margin-top:1rem;color:#c7c9ff;">
-                Click start and allow microphone access.
-            </p>
-        
-            <button id="startMic">Start Recording</button>
-            <button id="stopMic" disabled>Stop Recording</button>
-    </div>
-
-
-</div>
-
-<script>
-let mediaRecorder;
-let audioChunks = [];
-
-const startBtn = document.getElementById("startMic");
-const stopBtn = document.getElementById("stopMic");
-const statusText = document.getElementById("micStatus");
-
-startBtn.onclick = async () => {
-    audioChunks = [];
-
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-
-    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-
-    mediaRecorder.onstop = async () => {
-        statusText.innerText = "Processing audio...";
-
-        const blob = new Blob(audioChunks, { type: "audio/webm" });
-        const reader = new FileReader();
-
-        reader.onloadend = async () => {
-            const base64 = reader.result.split(",")[1];
-            const language = document.getElementById("micLanguage").value;
-
-            const response = await fetch("/process-mic", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    audio: base64,
-                    language: language
-                })
+    <script src="/static/js/particles.min.js"></script>
+    
+    <script>
+        // Initialize Particles
+        window.onload = function () {
+            particlesJS("particles-js", {
+                particles: {
+                    number: { value: 160, density: { enable: true, value_area: 800 } },
+                    color: { value: "#a855f7" },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.5, random: true },
+                    size: { value: 3, random: true },
+                    line_linked: { enable: true, distance: 150, color: "#a855f7", opacity: 0.2, width: 1 },
+                    move: { enable: true, speed: 1, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: { onhover: { enable: true, mode: "bubble" }, onclick: { enable: true, mode: "push" }, resize: true },
+                    modes: { bubble: { distance: 200, size: 6, duration: 2, opacity: 0.8, speed: 3 }, push: { particles_nb: 4 } }
+                },
+                retina_detect: true
             });
+        };
 
-            if (response.ok) {
-                window.location.href = "/result";
-            } else {
-                statusText.innerText = "Mic processing failed.";
+        // Tab Switching Logic
+        function selectMode(mode, el) {
+            document.querySelectorAll('.mode').forEach(m => m.classList.remove('active'));
+            el.classList.add('active');
+
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(mode + '-section').classList.add('active');
+        }
+
+        // Microphone Logic
+        let mediaRecorder;
+        let audioChunks = [];
+        const startBtn = document.getElementById("startMic");
+        const stopBtn = document.getElementById("stopMic");
+        const statusText = document.getElementById("micStatus");
+
+        startBtn.onclick = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+                mediaRecorder.onstop = async () => {
+                    statusText.innerText = "Processing audio... please wait.";
+                    
+                    // Create blob and convert to base64
+                    const blob = new Blob(audioChunks, { type: "audio/webm" });
+                    const reader = new FileReader();
+                    
+                    reader.onloadend = async () => {
+                        const base64 = reader.result.split(",")[1];
+                        const language = document.getElementById("micLanguage").value;
+
+                        try {
+                            const response = await fetch("/process-mic", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ audio: base64, language: language })
+                            });
+
+                            if (response.ok) {
+                                window.location.href = "/result";
+                            } else {
+                                statusText.innerText = "Error processing audio. Please try again.";
+                                startBtn.disabled = false;
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            statusText.innerText = "Server connection failed.";
+                            startBtn.disabled = false;
+                        }
+                    };
+                    reader.readAsDataURL(blob);
+                };
+
+                mediaRecorder.start();
+                statusText.innerText = "🔴 Recording... Speak now.";
+                statusText.style.color = "#a855f7";
+                statusText.style.borderColor = "#a855f7";
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "Microphone access denied.";
             }
         };
 
-        reader.readAsDataURL(blob);
-    };
-
-    mediaRecorder.start();
-    statusText.innerText = "Recording...";
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-};
-
-stopBtn.onclick = () => {
-    mediaRecorder.stop();
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-};
-</script>
-
-
-<script>
-function selectMode(mode, el) {
-    document.querySelectorAll('.mode').forEach(m => m.classList.remove('active'));
-    el.classList.add('active');
-
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(mode + '-section').classList.add('active');
-}
-</script>
-
+        stopBtn.onclick = () => {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+                statusText.style.color = "var(--text-muted)";
+                statusText.style.borderColor = "var(--card-border)";
+                stopBtn.disabled = true;
+            }
+        };
+    </script>
 </body>
 </html>
